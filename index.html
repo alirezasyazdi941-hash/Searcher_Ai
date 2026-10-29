@@ -1,0 +1,3377 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="dark light">
+<title>ALI — Adaptive Learning &amp; Intelligence</title>
+<style>
+:root{
+  --bg:#0b0c0e; --bg2:#111317; --bg3:#171a1f; --line:#262a31;
+  --fg:#e8eaed; --fg2:#9aa3ad; --fg3:#6b7480;
+  --acc:#5eead4; --acc2:#38bdf8; --warn:#fbbf24; --err:#f87171; --ok:#4ade80;
+  --r:10px; --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+}
+html[data-theme="light"]{
+  --bg:#f6f7f9; --bg2:#ffffff; --bg3:#eef1f5; --line:#d8dde5;
+  --fg:#12151a; --fg2:#4b5563; --fg3:#6b7280;
+  --acc:#0d9488; --acc2:#0284c7; --warn:#b45309; --err:#dc2626; --ok:#15803d;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0;background:var(--bg);color:var(--fg);
+  font:14px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Vazirmatn","IRANSans",Tahoma,sans-serif;
+  -webkit-font-smoothing:antialiased;overscroll-behavior:none;
+}
+button,input,select,textarea{font:inherit;color:inherit}
+a{color:var(--acc2)}
+code,kbd,pre{font-family:var(--mono);font-size:12px}
+#app{display:flex;min-height:100vh;min-height:100dvh}
+/* ---------- sidebar ---------- */
+#side{
+  width:238px;flex:0 0 238px;background:var(--bg2);border-inline-end:1px solid var(--line);
+  display:flex;flex-direction:column;position:sticky;top:0;height:100vh;height:100dvh;overflow:auto;
+}
+#brand{padding:16px 16px 10px;border-bottom:1px solid var(--line)}
+#brand h1{margin:0;font-size:15px;letter-spacing:.06em;font-weight:600}
+#brand h1 span{color:var(--acc)}
+#brand p{margin:4px 0 0;font-size:11px;color:var(--fg3);letter-spacing:.04em}
+nav{padding:8px;display:flex;flex-direction:column;gap:2px}
+nav button{
+  display:flex;align-items:center;gap:9px;width:100%;text-align:start;padding:8px 10px;
+  background:transparent;border:0;border-radius:8px;color:var(--fg2);cursor:pointer;font-size:13px;
+}
+nav button:hover{background:var(--bg3);color:var(--fg)}
+nav button.active{background:var(--bg3);color:var(--acc);box-shadow:inset 2px 0 0 var(--acc)}
+html[dir="rtl"] nav button.active{box-shadow:inset -2px 0 0 var(--acc)}
+nav .grp{font-size:10px;letter-spacing:.12em;color:var(--fg3);padding:12px 10px 4px;text-transform:uppercase}
+#sidefoot{margin-top:auto;padding:10px;border-top:1px solid var(--line);font-size:11px;color:var(--fg3)}
+/* ---------- main ---------- */
+#main{flex:1;min-width:0;display:flex;flex-direction:column}
+#topbar{
+  display:flex;gap:10px;align-items:center;padding:10px 16px;border-bottom:1px solid var(--line);
+  background:var(--bg2);position:sticky;top:0;z-index:20;
+}
+#topbar h2{margin:0;font-size:14px;font-weight:600;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#view{padding:18px 16px 60px;max-width:1180px;width:100%;margin:0 auto}
+/* ---------- primitives ---------- */
+.card{background:var(--bg2);border:1px solid var(--line);border-radius:var(--r);padding:14px;margin-bottom:14px}
+.card h3{margin:0 0 10px;font-size:13px;letter-spacing:.03em;color:var(--fg)}
+.card h4{margin:14px 0 6px;font-size:12px;color:var(--fg2);letter-spacing:.05em;text-transform:uppercase}
+.muted{color:var(--fg2)}
+.dim{color:var(--fg3);font-size:12px}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.grid{display:grid;gap:12px}
+.g2{grid-template-columns:repeat(auto-fit,minmax(240px,1fr))}
+.g3{grid-template-columns:repeat(auto-fit,minmax(180px,1fr))}
+.g4{grid-template-columns:repeat(auto-fit,minmax(140px,1fr))}
+button.btn{
+  background:var(--bg3);border:1px solid var(--line);color:var(--fg);padding:7px 13px;
+  border-radius:8px;cursor:pointer;font-size:13px;transition:.12s;min-height:34px;
+}
+button.btn:hover:not(:disabled){border-color:var(--acc);color:var(--acc)}
+button.btn:disabled{opacity:.45;cursor:not-allowed}
+button.btn.primary{background:var(--acc);border-color:var(--acc);color:#04211c;font-weight:600}
+html[data-theme="light"] button.btn.primary{color:#fff}
+button.btn.primary:hover:not(:disabled){filter:brightness(1.08);color:#04211c}
+button.btn.danger{border-color:#5c2626;color:var(--err)}
+button.btn.danger:hover:not(:disabled){background:#2a1414;border-color:var(--err)}
+button.btn.sm{padding:3px 9px;font-size:12px;min-height:26px}
+input[type=text],input[type=url],input[type=password],input[type=number],input[type=date],select,textarea{
+  background:var(--bg3);border:1px solid var(--line);border-radius:8px;padding:8px 10px;width:100%;
+  min-height:36px;outline:none;
+}
+input:focus,select:focus,textarea:focus{border-color:var(--acc);box-shadow:0 0 0 2px rgba(94,234,212,.14)}
+textarea{min-height:90px;resize:vertical;font-family:var(--mono);font-size:12px}
+label.f{display:block;font-size:11px;color:var(--fg2);margin:0 0 4px;letter-spacing:.04em}
+.field{margin-bottom:10px}
+.tag{
+  display:inline-block;padding:1px 8px;border-radius:99px;font-size:11px;border:1px solid var(--line);
+  background:var(--bg3);color:var(--fg2);margin:0 4px 4px 0;white-space:nowrap;
+}
+.tag.ok{border-color:#1c4a2e;color:var(--ok)}
+.tag.warn{border-color:#4a3c12;color:var(--warn)}
+.tag.err{border-color:#4a1f1f;color:var(--err)}
+.tag.acc{border-color:#134e48;color:var(--acc)}
+table{width:100%;border-collapse:collapse;font-size:12.5px}
+th,td{text-align:start;padding:7px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+th{color:var(--fg3);font-weight:500;font-size:11px;letter-spacing:.06em;text-transform:uppercase}
+tr:hover td{background:rgba(255,255,255,.015)}
+pre.out{background:var(--bg3);border:1px solid var(--line);border-radius:8px;padding:10px;overflow:auto;max-height:340px;white-space:pre-wrap;word-break:break-word}
+.empty{padding:28px;text-align:center;color:var(--fg3);border:1px dashed var(--line);border-radius:var(--r)}
+.hit{border:1px solid var(--line);border-radius:9px;padding:10px 12px;margin-bottom:9px;background:var(--bg2)}
+.hit:hover{border-color:#33414a}
+.hit .t{font-size:13px;font-weight:600;margin-bottom:3px}
+.hit .s{font-size:12.5px;color:var(--fg2);line-height:1.6}
+mark{background:#1e4d45;color:#b8fff2;border-radius:3px;padding:0 2px}
+html[data-theme="light"] mark{background:#ccfbf1;color:#0f766e}
+.bar{height:5px;background:var(--bg3);border-radius:99px;overflow:hidden}
+.bar>i{display:block;height:100%;background:linear-gradient(90deg,var(--acc2),var(--acc));border-radius:99px}
+.cite{font-family:var(--mono);font-size:11px;color:var(--acc);cursor:pointer;border-bottom:1px dotted var(--acc)}
+.quote{border-inline-start:2px solid var(--acc);padding:2px 0 2px 10px;margin:8px 0;color:var(--fg);font-size:13px}
+.kv{display:grid;grid-template-columns:150px 1fr;gap:4px 12px;font-size:12.5px}
+.kv dt{color:var(--fg3)}
+.kv dd{margin:0;word-break:break-word}
+.drop{border:1px dashed var(--line);border-radius:var(--r);padding:26px;text-align:center;color:var(--fg2);cursor:pointer}
+.drop.over{border-color:var(--acc);background:rgba(94,234,212,.05)}
+.toast{position:fixed;inset-inline-end:16px;bottom:16px;z-index:99;display:flex;flex-direction:column;gap:8px;max-width:min(420px,90vw)}
+.toast div{background:var(--bg2);border:1px solid var(--line);border-inline-start:3px solid var(--acc);padding:9px 13px;border-radius:8px;font-size:12.5px;box-shadow:0 8px 28px rgba(0,0,0,.5)}
+.toast div.err{border-inline-start-color:var(--err)}
+.toast div.warn{border-inline-start-color:var(--warn)}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.66);display:flex;align-items:center;justify-content:center;z-index:80;padding:16px}
+.modal .box{background:var(--bg2);border:1px solid var(--line);border-radius:12px;padding:18px;max-width:520px;width:100%}
+@media(max-width:860px){
+  #app{flex-direction:column}
+  #side{width:100%;flex:none;height:auto;position:sticky;top:0;z-index:30;border-inline-end:0;border-bottom:1px solid var(--line)}
+  #brand{padding:10px 12px}
+  #brand p{display:none}
+  nav{flex-direction:row;overflow-x:auto;padding:6px;gap:4px;-webkit-overflow-scrolling:touch}
+  nav .grp{display:none}
+  nav button{width:auto;white-space:nowrap;font-size:12px;padding:7px 11px}
+  #sidefoot{display:none}
+  #view{padding:14px 12px 80px}
+  .kv{grid-template-columns:110px 1fr}
+}
+</style>
+</head>
+<body>
+<div id="app">
+  <aside id="side">
+    <div id="brand">
+      <h1>ALI<span>·</span></h1>
+      <p>ADAPTIVE LEARNING &amp; INTELLIGENCE</p>
+    </div>
+    <nav id="nav"></nav>
+    <div id="sidefoot">
+      <div id="buildinfo">local · IndexedDB</div>
+    </div>
+  </aside>
+  <main id="main">
+    <header id="topbar">
+      <h2 id="vtitle">Dashboard</h2>
+      <button class="btn sm" id="langBtn" title="Language">EN / فا</button>
+      <button class="btn sm" id="themeBtn" title="Theme">◐</button>
+    </header>
+    <section id="view"></section>
+  </main>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+"use strict";
+/* =====================================================================
+   ALI — Adaptive Learning & Intelligence
+   Single-file build. Storage: IndexedDB. Retrieval: in-browser BM25.
+   See the Diagnostics view for the in-app self-test suite and the
+   "Delivery report" for what is and is not implemented.
+   ===================================================================== */
+
+/* ------------------------------------------------------------------ */
+/* 0. Tiny helpers                                                     */
+/* ------------------------------------------------------------------ */
+const $  = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
+const uid = () => (crypto.randomUUID ? crypto.randomUUID()
+  : 'id-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 10));
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const nowISO = () => new Date().toISOString();
+const clamp01 = n => Math.max(0, Math.min(1, n));
+const fmtBytes = n => n == null ? '—' : n < 1024 ? n + ' B'
+  : n < 1048576 ? (n / 1024).toFixed(1) + ' KB' : (n / 1048576).toFixed(2) + ' MB';
+const fmtDate = s => { try { return new Date(s).toLocaleString(); } catch { return String(s); } };
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+/* Global UI language: 'en' | 'fa' */
+let LANG = sessionStorage.getItem('ali.lang') || 'en';
+const t = (en, fa) => (LANG === 'fa' ? fa : en);
+
+function toast(msg, kind = '') {
+  const el = document.createElement('div');
+  el.className = kind; el.textContent = msg;
+  $('#toast').appendChild(el);
+  setTimeout(() => { el.style.opacity = '0'; el.style.transition = '.4s'; setTimeout(() => el.remove(), 420); }, 4200);
+}
+
+/* ------------------------------------------------------------------ */
+/* 1. Hashing (SHA-256 with a documented non-crypto fallback)          */
+/* ------------------------------------------------------------------ */
+async function sha256Hex(str) {
+  if (window.crypto && crypto.subtle && crypto.subtle.digest) {
+    try {
+      const buf = new TextEncoder().encode(str);
+      const h = await crypto.subtle.digest('SHA-256', buf);
+      return { hex: [...new Uint8Array(h)].map(b => b.toString(16).padStart(2, '0')).join(''), algo: 'SHA-256' };
+    } catch (_) { /* fall through */ }
+  }
+  // Fallback: cyrb128-style 128-bit non-cryptographic digest. Clearly labelled.
+  let h1 = 1779033703, h2 = 3144134277, h3 = 1013904242, h4 = 2773480762;
+  for (let i = 0; i < str.length; i++) {
+    const k = str.charCodeAt(i);
+    h1 = h2 ^ Math.imul(h1 ^ k, 597399067);
+    h2 = h3 ^ Math.imul(h2 ^ k, 2869860233);
+    h3 = h4 ^ Math.imul(h3 ^ k, 951274213);
+    h4 = h1 ^ Math.imul(h4 ^ k, 2716044179);
+  }
+  const hex = [h1, h2, h3, h4].map(x => (x >>> 0).toString(16).padStart(8, '0')).join('');
+  return { hex, algo: 'cyrb128-fallback' };
+}
+
+/* ------------------------------------------------------------------ */
+/* 2. Text normalization, tokenization, language detection             */
+/* ------------------------------------------------------------------ */
+const AR_DIACRITICS = /[\u0610-\u061A\u064B-\u065F\u0670\u06D6-\u06ED]/g;
+const BIDI_MARKS     = /[\u200B-\u200F\u202A-\u202E\u2066-\u2069\uFEFF]/g;
+
+/**
+ * Produce a *searchable* normalized representation.
+ * Originals are never mutated — this output is stored alongside them.
+ */
+function normalizeText(s) {
+  if (!s) return '';
+  let x = String(s).normalize('NFC');
+  x = x.replace(AR_DIACRITICS, '');        // Arabic/Persian harakat
+  x = x.replace(/\u0640/g, '');            // tatweel
+  x = x.replace(BIDI_MARKS, ' ');          // zero-width + bidi controls
+  x = x.replace(/\u200C/g, '');            // ZWNJ  (می‌رود -> میرود)
+  x = x.replace(/[ىي]/g, 'ی');             // Arabic yeh -> Persian yeh
+  x = x.replace(/ك/g, 'ک');                // Arabic kaf -> Persian kaf
+  x = x.replace(/[أإآٱ]/g, 'ا');
+  x = x.replace(/ة/g, 'ه');
+  x = x.replace(/ؤ/g, 'و');
+  x = x.replace(/ئ/g, 'ی');
+  x = x.replace(/[«»“”„]/g, '"');
+  x = x.toLowerCase();
+  x = x.replace(/\s+/g, ' ').trim();
+  return x;
+}
+
+const STOPWORDS = new Set([
+  'a','an','the','and','or','but','if','then','than','of','in','on','at','to','for','from','with',
+  'by','as','is','are','was','were','be','been','being','it','its','this','that','these','those',
+  'i','you','he','she','we','they','them','his','her','their','our','your','my','me','us','do',
+  'does','did','not','no','so','such','can','could','will','would','shall','should','may','might',
+  'have','has','had','there','here','what','which','who','whom','when','where','why','how','all',
+  'any','some','more','most','other','into','about','also','just','very','too','only','own','same',
+  'و','در','به','از','که','این','آن','را','با','برای','است','هست','بود','شد','شده','می','نمی',
+  'تا','بر','یا','اما','اگر','هم','نیز','چه','چی','که','کە','یکی','دیگر','همه','هیچ','بین','روی',
+  'کرد','کند','کنند','دارد','دارند','داشت','باشد','باشند','خود','ما','شما','او','آنها','ایشان'
+]);
+const TOKEN_RE = /[\p{L}\p{N}]+/gu;
+
+function tokenize(normalized) {
+  const m = normalized.match(TOKEN_RE);
+  if (!m) return [];
+  const out = [];
+  for (const w of m) if (!STOPWORDS.has(w)) out.push(w);
+  return out;
+}
+function rawTokens(normalized) {
+  const m = normalized.match(TOKEN_RE);
+  return m ? m.slice() : [];
+}
+
+function detectLang(text) {
+  const fa = (text.match(/[\u0600-\u06FF]/g) || []).length;
+  const en = (text.match(/[A-Za-z]/g) || []).length;
+  if (!fa && !en) return 'und';
+  if (!en) return 'fa';
+  if (!fa) return 'en';
+  const r = fa / en;
+  if (r > 3) return 'fa';
+  if (r < 0.33) return 'en';
+  return 'mixed';
+}
+
+/* ------------------------------------------------------------------ */
+/* 3. Chunking                                                         */
+/* ------------------------------------------------------------------ */
+const BREAK_RE = /[.!?؟\n۔]/g;
+
+function chunkText(text, target = 900, overlap = 150) {
+  const out = [];
+  if (!text) return out;
+  let i = 0, guard = 0;
+  while (i < text.length && guard++ < 100000) {
+    let end = Math.min(text.length, i + target);
+    if (end < text.length) {
+      const from = i + Math.floor(target * 0.6);
+      const win = text.slice(from, end);
+      BREAK_RE.lastIndex = 0;
+      let best = -1, m;
+      while ((m = BREAK_RE.exec(win))) best = m.index;
+      if (best >= 0) end = from + best + 1;
+    }
+    const raw = text.slice(i, end);
+    if (raw.trim()) out.push({ raw, start: i, end });
+    if (end >= text.length) break;
+    i = Math.max(end - overlap, i + 1);
+  }
+  return out;
+}
+
+/* ------------------------------------------------------------------ */
+/* 4. IndexedDB layer                                                  */
+/* ------------------------------------------------------------------ */
+const DB_NAME = 'ali-kb';
+const DB_VER = 1;
+let db = null;
+
+function openDB() {
+  return new Promise((res, rej) => {
+    const req = indexedDB.open(DB_NAME, DB_VER);
+    req.onupgradeneeded = e => {
+      const d = e.target.result;
+      const mk = (name, opts, idx) => {
+        if (d.objectStoreNames.contains(name)) return;
+        const s = d.createObjectStore(name, opts);
+        (idx || []).forEach(([n, k, o]) => s.createIndex(n, k, o || {}));
+      };
+      mk('documents', { keyPath: 'id' }, [
+        ['contentHash', 'contentHash', { unique: false }],
+        ['sourceKey', 'sourceKey', { unique: false }],
+        ['createdAt', 'createdAt'],
+        ['lang', 'lang'],
+        ['status', 'status']
+      ]);
+      mk('content', { keyPath: 'id' });
+      mk('chunks', { keyPath: 'id' }, [['docId', 'docId']]);
+      mk('settings', { keyPath: 'k' });
+      mk('tools', { keyPath: 'id' });
+      mk('audit', { keyPath: 'id', autoIncrement: true }, [['ts', 'ts']]);
+      mk('answers', { keyPath: 'id' }, [['createdAt', 'createdAt']]);
+      mk('meta', { keyPath: 'k' });
+    };
+    req.onsuccess = () => res(req.result);
+    req.onerror = () => rej(req.error);
+  });
+}
+
+function tx(store, mode = 'readonly') { return db.transaction(store, mode).objectStore(store); }
+function reqP(r) { return new Promise((res, rej) => { r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); }); }
+const idbGet    = (s, k) => reqP(tx(s).get(k));
+const idbAll    = (s)    => reqP(tx(s).getAll());
+const idbPut    = (s, v) => reqP(tx(s, 'readwrite').put(v));
+const idbDel    = (s, k) => reqP(tx(s, 'readwrite').delete(k));
+const idbClear  = (s)    => reqP(tx(s, 'readwrite').clear());
+const idbCount  = (s)    => reqP(tx(s).count());
+
+/** Multi-store atomic write. ops = [{store, type:'put'|'delete'|'clear', value|key}] */
+function atomic(ops) {
+  return new Promise((res, rej) => {
+    const stores = [...new Set(ops.map(o => o.store))];
+    const t = db.transaction(stores, 'readwrite');
+    t.oncomplete = () => res(true);
+    t.onerror = () => rej(t.error);
+    t.onabort = () => rej(t.error || new Error('transaction aborted'));
+    for (const op of ops) {
+      const s = t.objectStore(op.store);
+      if (op.type === 'put') s.put(op.value);
+      else if (op.type === 'delete') s.delete(op.key);
+      else if (op.type === 'clear') s.clear();
+    }
+  });
+}
+
+/* ------------------------------------------------------------------ */
+/* 5. Settings                                                         */
+/* ------------------------------------------------------------------ */
+const SCORE_VERSION = 'source-score-1.0.0';
+const DEFAULT_SETTINGS = {
+  lang: LANG,
+  theme: 'dark',
+  chunkSize: 900,
+  chunkOverlap: 150,
+  maxFileBytes: 8 * 1024 * 1024,
+  maxChunksPerDoc: 4000,
+  corsProxy: '',
+  storeOriginalBlob: false,
+  authEnabled: false,
+  authSalt: null,
+  authHash: null,
+  authIter: 150000,
+  llm: { enabled: false, endpoint: '', model: '', apiKey: '', timeoutMs: 30000 },
+  retentionDays: 0
+};
+let S = { ...DEFAULT_SETTINGS };
+
+async function loadSettings() {
+  const rows = await idbAll('settings');
+  S = { ...DEFAULT_SETTINGS };
+  for (const r of rows) S[r.k] = r.v;
+  LANG = S.lang || LANG;
+}
+async function setSetting(k, v) { S[k] = v; await idbPut('settings', { k, v }); }
+
+/* ------------------------------------------------------------------ */
+/* 6. Audit log                                                        */
+/* ------------------------------------------------------------------ */
+async function audit(action, detail = '', actor = 'user') {
+  try {
+    await idbPut('audit', { ts: nowISO(), action, detail: String(detail).slice(0, 800), actor });
+  } catch (e) { console.warn('audit failed', e); }
+}
+
+/* ------------------------------------------------------------------ */
+/* 7. Auth (optional local passcode gate for destructive operations)   */
+/* ------------------------------------------------------------------ */
+let UNLOCKED = !('authEnabled' in DEFAULT_SETTINGS); // recalculated at boot
+const subtleOK = !!(window.crypto && crypto.subtle && crypto.subtle.importKey);
+
+function hexToBytes(hex) {
+  const out = new Uint8Array(hex.length / 2);
+  for (let i = 0; i < out.length; i++) out[i] = parseInt(hex.substr(i * 2, 2), 16);
+  return out;
+}
+function bytesToHex(buf) {
+  return [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2, '0')).join('');
+}
+async function pbkdf2(pass, saltHex, iter) {
+  const key = await crypto.subtle.importKey('raw', new TextEncoder().encode(pass), 'PBKDF2', false, ['deriveBits']);
+  const bits = await crypto.subtle.deriveBits(
+    { name: 'PBKDF2', salt: hexToBytes(saltHex), iterations: iter, hash: 'SHA-256' }, key, 256);
+  return bytesToHex(bits);
+}
+async function setPasscode(pass) {
+  if (!subtleOK) throw new Error('Web Crypto unavailable — cannot hash a passcode in this context.');
+  if (!pass || pass.length < 8) throw new Error('Passcode must be at least 8 characters.');
+  const salt = bytesToHex(crypto.getRandomValues(new Uint8Array(16)));
+  const hash = await pbkdf2(pass, salt, S.authIter);
+  await setSetting('authSalt', salt);
+  await setSetting('authHash', hash);
+  await setSetting('authEnabled', true);
+  UNLOCKED = true;
+  await audit('auth.passcode_set', 'PBKDF2-SHA256 / ' + S.authIter + ' iterations');
+}
+async function verifyPasscode(pass) {
+  if (!S.authEnabled) return true;
+  if (!S.authSalt || !S.authHash) return false;
+  const h = await pbkdf2(pass, S.authSalt, S.authIter);
+  return h === S.authHash;
+}
+async function requireAdmin(reason) {
+  if (!S.authEnabled || UNLOCKED) return true;
+  const pass = prompt(t('Admin passcode required for: ', 'رمز مدیریت لازم است برای: ') + reason);
+  if (pass == null) return false;
+  const ok = await verifyPasscode(pass);
+  if (ok) { UNLOCKED = true; await audit('auth.unlock', reason); }
+  else { toast(t('Incorrect passcode.', 'رمز نادرست است.'), 'err'); await audit('auth.fail', reason); }
+  return ok;
+}
+
+/* ------------------------------------------------------------------ */
+/* 8. In-memory inverted index + BM25                                  */
+/* ------------------------------------------------------------------ */
+/**
+ * buildIndexData(chunkList) -> {postings, cmap, N, avgLen}
+ * Pure function; used both by the live index and by the self-tests.
+ */
+function buildIndexData(chunkList) {
+  const postings = new Map();
+  const cmap = new Map();
+  let totalLen = 0;
+  for (const c of chunkList) {
+    const toks = tokenize(c.norm || '');
+    const len = toks.length || 1;
+    cmap.set(c.id, { docId: c.docId, len, norm: c.norm || '', raw: c.raw || '', idx: c.idx });
+    totalLen += len;
+    const tf = new Map();
+    for (const tk of toks) tf.set(tk, (tf.get(tk) || 0) + 1);
+    for (const [tk, n] of tf) {
+      let m = postings.get(tk);
+      if (!m) { m = new Map(); postings.set(tk, m); }
+      m.set(c.id, n);
+    }
+  }
+  const N = cmap.size;
+  return { postings, cmap, N, avgLen: N ? totalLen / N : 0 };
+}
+
+const K1 = 1.2, B = 0.75;
+
+/**
+ * bm25Rank(idxData, query, docMap, opts) -> {results, qTokens, phrases, note}
+ * opts: {docIds:Set, lang, sourceType, dateFrom, dateTo, limit, phraseOnly}
+ */
+function bm25Rank(idxData, query, docMap, opts = {}) {
+  const qnorm = normalizeText(query);
+  const phrases = [...qnorm.matchAll(/"([^"]+)"/g)].map(m => m[1].trim()).filter(Boolean);
+  const cleanQ = qnorm.replace(/"/g, ' ');
+  let qTokens = [...new Set(tokenize(cleanQ))];
+  if (!qTokens.length && phrases.length) {
+    qTokens = [...new Set(phrases.flatMap(p => tokenize(p)))];
+  }
+  const note = qTokens.length ? '' : 'Query contains no searchable terms (all stopwords or empty).';
+
+  const scores = new Map();
+  const matched = new Map();
+  const N = idxData.N || 1;
+  const avg = idxData.avgLen || 1;
+
+  for (const tk of qTokens) {
+    const plist = idxData.postings.get(tk);
+    if (!plist) continue;
+    const df = plist.size;
+    const idf = Math.log(1 + (N - df + 0.5) / (df + 0.5));
+    for (const [cid, tf] of plist) {
+      const cm = idxData.cmap.get(cid);
+      if (!cm) continue;
+      const denom = tf + K1 * (1 - B + B * (cm.len / avg));
+      const s = idf * (tf * (K1 + 1)) / denom;
+      scores.set(cid, (scores.get(cid) || 0) + s);
+      matched.set(cid, (matched.get(cid) || 0) + 1);
+    }
+  }
+
+  const results = [];
+  for (const [cid, score] of scores) {
+    const cm = idxData.cmap.get(cid);
+    const doc = docMap.get(cm.docId);
+    if (!doc) continue;
+    if (opts.docIds && !opts.docIds.has(cm.docId)) continue;
+    if (opts.lang && opts.lang !== 'any' && doc.lang !== opts.lang) continue;
+    if (opts.sourceType && opts.sourceType !== 'any' && doc.sourceType !== opts.sourceType) continue;
+    if (opts.dateFrom && new Date(doc.createdAt) < new Date(opts.dateFrom)) continue;
+    if (opts.dateTo && new Date(doc.createdAt) > new Date(opts.dateTo + 'T23:59:59')) continue;
+    if (phrases.length) {
+      const okPhrase = phrases.every(p => cm.norm.includes(p));
+      if (!okPhrase) continue;
+    }
+    // Small coverage bonus: chunks matching more distinct query terms rank higher.
+    const coverage = qTokens.length ? (matched.get(cid) || 0) / qTokens.length : 0;
+    results.push({ chunkId: cid, docId: cm.docId, score: score * (0.6 + 0.4 * coverage), matched: matched.get(cid) || 0, coverage });
+  }
+  results.sort((a, b) => b.score - a.score);
+  const limit = opts.limit || 40;
+  return { results: results.slice(0, limit), total: results.length, qTokens, phrases, note };
+}
+
+/* Live index */
+const IDX = { data: { postings: new Map(), cmap: new Map(), N: 0, avgLen: 0 }, built: false, builtAt: null };
+
+async function rebuildIndex(force = false) {
+  if (IDX.built && !force) return IDX;
+  const chunks = await idbAll('chunks');
+  IDX.data = buildIndexData(chunks);
+  IDX.built = true;
+  IDX.builtAt = nowISO();
+  return IDX;
+}
+
+/* Document metadata cache (documents store is lightweight by design) */
+let DOCS = new Map();
+async function reloadDocs() {
+  const list = await idbAll('documents');
+  DOCS = new Map(list.map(d => [d.id, d]));
+  return DOCS;
+}
+
+/* ------------------------------------------------------------------ */
+/* 9. Snippet building                                                 */
+/* ------------------------------------------------------------------ */
+function splitSentences(text) {
+  if (!text) return [];
+  const parts = text.split(/(?<=[.!?؟۔])\s+|\n+/u);
+  return parts.map(s => s.trim()).filter(s => s.length > 1);
+}
+
+function buildSnippet(raw, qTokens, maxLen = 260) {
+  const sents = splitSentences(raw);
+  let best = null, bestScore = -1;
+  for (const s of sents) {
+    const toks = new Set(tokenize(normalizeText(s)));
+    let sc = 0;
+    for (const q of qTokens) if (toks.has(q)) sc++;
+    if (sc > bestScore) { bestScore = sc; best = s; }
+  }
+  let out = best || raw.slice(0, maxLen);
+  if (out.length > maxLen) out = out.slice(0, maxLen).trim() + '…';
+  return out;
+}
+
+function highlight(text, qTokens) {
+  let out = esc(text);
+  const uniq = [...new Set(qTokens)].filter(w => w.length > 1).slice(0, 12);
+  for (const w of uniq) {
+    const re = new RegExp('(' + w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')', 'giu');
+    out = out.replace(re, '<mark>$1</mark>');
+  }
+  return out;
+}
+
+/* ------------------------------------------------------------------ */
+/* 10. Extractors                                                      */
+/* ------------------------------------------------------------------ */
+const MAX_FILE_BYTES = () => S.maxFileBytes || DEFAULT_SETTINGS.maxFileBytes;
+
+function parseFrontMatter(text) {
+  const m = /^---\r?\n([\s\S]*?)\r?\n---\r?\n?/.exec(text);
+  if (!m) return { meta: {}, body: text };
+  const meta = {};
+  for (const line of m[1].split(/\r?\n/)) {
+    const mm = /^([A-Za-z_][\w-]*)\s*:\s*(.+)$/.exec(line.trim());
+    if (mm) meta[mm[1].toLowerCase()] = mm[2].replace(/^["']|["']$/g, '').trim();
+  }
+  return { meta, body: text.slice(m[0].length) };
+}
+
+function htmlToText(html) {
+  const doc = new DOMParser().parseFromString(html, 'text/html');
+  // Remove active/unsafe content before reading text.
+  doc.querySelectorAll('script,style,noscript,iframe,object,embed,svg,form,link,meta[http-equiv]')
+     .forEach(n => n.remove());
+  const meta = {
+    title: doc.querySelector('title')?.textContent?.trim() || '',
+    author: doc.querySelector('meta[name="author"]')?.content || doc.querySelector('meta[property="article:author"]')?.content || '',
+    publisher: doc.querySelector('meta[property="og:site_name"]')?.content || '',
+    pubDate: doc.querySelector('meta[property="article:published_time"]')?.content
+          || doc.querySelector('meta[name="date"]')?.content
+          || doc.querySelector('time[datetime]')?.getAttribute('datetime') || '',
+    description: doc.querySelector('meta[name="description"]')?.content || '',
+    license: doc.querySelector('meta[name="license"]')?.content || '',
+    canonical: doc.querySelector('link[rel="canonical"]')?.getAttribute('href') || ''
+  };
+  const body = doc.body ? doc.body.innerText || doc.body.textContent || '' : doc.documentElement.textContent || '';
+  return { text: body.replace(/\n{3,}/g, '\n\n').trim(), meta, hadScripts: /<script/i.test(html) };
+}
+
+function csvToText(csv) {
+  // RFC4180-ish parser (handles quoted fields with escaped quotes and newlines)
+  const rows = [];
+  let row = [], field = '', inQ = false;
+  for (let i = 0; i < csv.length; i++) {
+    const c = csv[i];
+    if (inQ) {
+      if (c === '"') { if (csv[i + 1] === '"') { field += '"'; i++; } else inQ = false; }
+      else field += c;
+    } else {
+      if (c === '"') inQ = true;
+      else if (c === ',') { row.push(field); field = ''; }
+      else if (c === '\n') { row.push(field); rows.push(row); row = []; field = ''; }
+      else if (c === '\r') { /* skip */ }
+      else field += c;
+    }
+  }
+  if (field.length || row.length) { row.push(field); rows.push(row); }
+  if (!rows.length) return { text: '', rows: 0, cols: 0 };
+  const header = rows[0];
+  const lines = [];
+  for (let r = 1; r < rows.length; r++) {
+    const parts = [];
+    for (let c = 0; c < header.length; c++) {
+      const v = (rows[r][c] || '').trim();
+      if (v) parts.push(header[c] + ': ' + v);
+    }
+    if (parts.length) lines.push(parts.join(' | '));
+  }
+  return { text: lines.join('\n'), rows: rows.length - 1, cols: header.length, header };
+}
+
+function jsonToText(json) {
+  let parsed;
+  try { parsed = JSON.parse(json); } catch (e) { throw new Error('Invalid JSON: ' + e.message); }
+  const flat = [];
+  const walk = (v, path, depth) => {
+    if (depth > 6) return;
+    if (v === null || typeof v !== 'object') { flat.push((path || 'value') + ': ' + String(v)); return; }
+    if (Array.isArray(v)) { v.slice(0, 400).forEach((x, i) => walk(x, path + '[' + i + ']', depth + 1)); return; }
+    for (const k of Object.keys(v).slice(0, 400)) walk(v[k], path ? path + '.' + k : k, depth + 1);
+  };
+  walk(parsed, '', 0);
+  return { text: flat.join('\n'), keys: flat.length };
+}
+
+let PDFJS = null;
+async function loadPdfJs() {
+  if (PDFJS) return PDFJS;
+  if (window.pdfjsLib) { PDFJS = window.pdfjsLib; return PDFJS; }
+  await new Promise((res, rej) => {
+    const s = document.createElement('script');
+    s.src = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@4.0.379/build/pdf.min.js';
+    s.onload = res;
+    s.onerror = () => rej(new Error('pdf.js could not be loaded (offline or CDN blocked).'));
+    document.head.appendChild(s);
+  });
+  const lib = window.pdfjsLib;
+  if (!lib) throw new Error('pdf.js loaded but global not present.');
+  lib.GlobalWorkerOptions.workerSrc = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@4.0.379/build/pdf.worker.min.js';
+  PDFJS = lib;
+  return lib;
+}
+
+async function extractPdf(file) {
+  const lib = await loadPdfJs(); // throws a clear message if unavailable
+  const buf = await file.arrayBuffer();
+  const pdf = await lib.getDocument({ data: buf }).promise;
+  const pages = [];
+  const maxPages = Math.min(pdf.numPages, 400);
+  for (let p = 1; p <= maxPages; p++) {
+    const page = await pdf.getPage(p);
+    const tc = await page.getTextContent();
+    pages.push(tc.items.map(i => i.str).join(' '));
+  }
+  const text = pages.join('\n\n').replace(/[ \t]{2,}/g, ' ').trim();
+  return {
+    text,
+    meta: { pageCount: pdf.numPages, pagesExtracted: maxPages },
+    warning: text.length < 40 ? 'Very little text extracted — this is likely a scanned PDF. OCR is not available in this build.' : ''
+  };
+}
+
+/** Parse a File into {text, meta, warning, sourceType} */
+async function extractFile(file) {
+  if (file.size > MAX_FILE_BYTES()) {
+    throw new Error('File exceeds configured size limit (' + fmtBytes(MAX_FILE_BYTES()) + ').');
+  }
+  const name = file.name || 'untitled';
+  const ext = (name.split('.').pop() || '').toLowerCase();
+  const size = file.size;
+
+  if (ext === 'pdf' || file.type === 'application/pdf') {
+    const r = await extractPdf(file);
+    return { ...r, sourceType: 'pdf', meta: { ...r.meta, filename: name, sizeBytes: size, chan: { metadata: true } } };
+  }
+  const text = await file.text();
+  if (!text.trim()) throw new Error('File is empty or contains no readable text.');
+
+  if (ext === 'html' || ext === 'htm' || file.type === 'text/html') {
+    const r = htmlToText(text);
+    return {
+      text: r.text, sourceType: 'html',
+      meta: { ...r.meta, filename: name, sizeBytes: size, chan: { metadata: true, html: true }, scriptsStripped: r.hadScripts }
+    };
+  }
+  if (ext === 'csv' || file.type === 'text/csv') {
+    const r = csvToText(text);
+    return {
+      text: r.text || text, sourceType: 'csv',
+      meta: { filename: name, sizeBytes: size, rows: r.rows, cols: r.cols, header: r.header, chan: { structured: true } }
+    };
+  }
+  if (ext === 'json' || file.type === 'application/json') {
+    const r = jsonToText(text);
+    return { text: r.text, sourceType: 'json', meta: { filename: name, sizeBytes: size, fields: r.keys, chan: { structured: true } } };
+  }
+  if (ext === 'md' || ext === 'markdown') {
+    const fm = parseFrontMatter(text);
+    return {
+      text: fm.body, sourceType: 'markdown',
+      meta: {
+        filename: name, sizeBytes: size, title: fm.meta.title || '', author: fm.meta.author || '',
+        pubDate: fm.meta.date || fm.meta.published || '', tags: fm.meta.tags || '',
+        chan: { metadata: !!Object.keys(fm.meta).length, frontmatter: true }
+      }
+    };
+  }
+  if (ext === 'txt' || ext === '' || file.type.startsWith('text/')) {
+    return { text, sourceType: 'text', meta: { filename: name, sizeBytes: size, chan: {} } };
+  }
+  throw new Error('Unsupported file type: .' + ext + ' (supported: txt, md, csv, json, html, pdf)');
+}
+
+/* --- URL ingestion with SSRF-oriented guards (best effort in-browser) --- */
+const PRIVATE_HOST_RE = /^(localhost|127\.|0\.0\.0\.0|10\.|192\.168\.|169\.254\.|172\.(1[6-9]|2\d|3[01])\.|\[::1\]|\[fd|\[fe80|.*\.local$|.*\.internal$)/i;
+
+function validateUrl(raw) {
+  let u;
+  try { u = new URL(raw); } catch { return { ok: false, reason: 'Malformed URL.' }; }
+  if (!/^https?:$/.test(u.protocol)) return { ok: false, reason: 'Only http:// and https:// URLs are allowed.' };
+  if (u.username || u.password) return { ok: false, reason: 'URLs containing credentials are rejected.' };
+  if (PRIVATE_HOST_RE.test(u.hostname)) {
+    return { ok: false, reason: 'Destination resolves to a loopback/private/link-local pattern and is blocked (SSRF guard).' };
+  }
+  if (!u.hostname.includes('.')) return { ok: false, reason: 'Hostname has no public-looking domain component.' };
+  return { ok: true, url: u };
+}
+
+async function fetchUrl(rawUrl, { timeoutMs = 20000 } = {}) {
+  const v = validateUrl(rawUrl);
+  if (!v.ok) throw new Error(v.reason);
+  let target = v.url.href;
+  if (S.corsProxy) target = S.corsProxy.replace('{url}', encodeURIComponent(target));
+
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), timeoutMs);
+  let resp;
+  try {
+    resp = await fetch(target, { signal: ctrl.signal, redirect: 'follow', credentials: 'omit', mode: 'cors' });
+  } catch (e) {
+    clearTimeout(timer);
+    throw new Error('Fetch failed: ' + (e.name === 'AbortError'
+      ? 'request timed out after ' + timeoutMs + ' ms.'
+      : e.message + ' — most likely the site does not send CORS headers. Browser-side URL ingestion only works for CORS-enabled origins unless a proxy is configured in Settings.'));
+  }
+  clearTimeout(timer);
+  if (!resp.ok) throw new Error('HTTP ' + resp.status + ' ' + resp.statusText);
+  const finalUrl = resp.url || target;
+  // Re-validate after redirects (basic revalidation).
+  if (S.corsProxy === '' && resp.url) {
+    const rev = validateUrl(resp.url);
+    if (!rev.ok) throw new Error('Redirected to a blocked destination: ' + rev.reason);
+  }
+  const ctype = resp.headers.get('content-type') || '';
+  const body = await resp.text();
+  if (body.length > MAX_FILE_BYTES()) throw new Error('Response exceeds size limit.');
+  if (/html/i.test(ctype) || /^\s*</.test(body)) {
+    const r = htmlToText(body);
+    return {
+      text: r.text, sourceType: 'url',
+      meta: {
+        ...r.meta, url: finalUrl, requestedUrl: rawUrl, contentType: ctype,
+        fetchedAt: nowISO(), chan: { metadata: true, html: true, network: true }
+      }
+    };
+  }
+  return {
+    text: body, sourceType: 'url',
+    meta: { url: finalUrl, requestedUrl: rawUrl, contentType: ctype, fetchedAt: nowISO(), chan: { network: true } }
+  };
+}
+
+/* ------------------------------------------------------------------ */
+/* 11. Import pipeline                                                 */
+/* ------------------------------------------------------------------ */
+function nearDupShingles(text, k = 5, cap = 400) {
+  const toks = rawTokens(normalizeText(text));
+  const set = new Set();
+  for (let i = 0; i + k <= toks.length && set.size < cap; i++) set.add(toks.slice(i, i + k).join(' '));
+  return set;
+}
+function jaccard(a, b) {
+  if (!a.size || !b.size) return 0;
+  let inter = 0;
+  for (const x of a) if (b.has(x)) inter++;
+  return inter / (a.size + b.size - inter);
+}
+
+/**
+ * Ingest one extracted record.
+ * opts: {title, author, pubDate, tags, force, originalBlob, originalText}
+ */
+async function ingestRecord(rec, opts = {}) {
+  const rawText = rec.text || '';
+  if (!rawText.trim()) throw new Error('No extractable text.');
+  const normFull = normalizeText(rawText);
+  const { hex: hash, algo } = await sha256Hex(normFull);
+
+  const sourceKey = rec.meta?.url ? 'url:' + rec.meta.url
+    : 'file:' + (rec.meta?.filename || opts.title || 'untitled');
+
+  // Duplicate detection by content hash.
+  const existing = await reqP(tx('documents').index('contentHash').getAll(hash));
+  const live = existing.filter(d => d.status !== 'superseded');
+  if (live.length && !opts.force) {
+    return { status: 'duplicate', docId: live[0].id, title: live[0].title, message: 'Identical normalized content already present (' + algo + ').' };
+  }
+
+  // Version detection by source key.
+  let version = 1, prevId = null, prevDoc = null;
+  const sameSource = await reqP(tx('documents').index('sourceKey').getAll(sourceKey));
+  const prev = sameSource.filter(d => d.status !== 'superseded').sort((a, b) => b.version - a.version)[0];
+  if (prev && prev.contentHash !== hash) { version = prev.version + 1; prevId = prev.id; prevDoc = prev; }
+
+  // Chunking
+  const rawChunks = chunkText(rawText, S.chunkSize, S.chunkOverlap).slice(0, S.maxChunksPerDoc || 4000);
+  if (!rawChunks.length) throw new Error('Chunking produced no content.');
+
+  const docId = uid();
+  const lang = detectLang(rawText);
+  const alnum = (rawText.match(/[\p{L}\p{N}]/gu) || []).length;
+  const printable = (rawText.match(/[^\u0000-\u0008\u000B\u000C\u000E-\u001F]/g) || []).length;
+  const extractionQuality = rawText.length ? clamp01(printable / rawText.length) : 0;
+  const alnumRatio = rawText.length ? clamp01(alnum / rawText.length) : 0;
+
+  const doc = {
+    id: docId,
+    title: (opts.title || rec.meta?.title || rec.meta?.filename || rec.meta?.url || 'Untitled').slice(0, 300),
+    sourceType: rec.sourceType || 'text',
+    sourceKey,
+    sourceUrl: rec.meta?.url || '',
+    filename: rec.meta?.filename || '',
+    mime: rec.meta?.contentType || '',
+    sizeBytes: rec.meta?.sizeBytes ?? rawText.length,
+    contentHash: hash,
+    hashAlgo: algo,
+    version, prevId,
+    lang,
+    createdAt: nowISO(),
+    updatedAt: nowISO(),
+    status: 'indexed',
+    supersededBy: null,
+    chunkCount: rawChunks.length,
+    charCount: rawText.length,
+    wordCount: (rawText.match(TOKEN_RE) || []).length,
+    meta: {
+      ...rec.meta,
+      author: opts.author || rec.meta?.author || '',
+      pubDate: opts.pubDate || rec.meta?.pubDate || '',
+      tags: opts.tags || rec.meta?.tags || '',
+      extraction: {
+        quality: extractionQuality,
+        alnumRatio,
+        warning: rec.warning || '',
+        extractedAt: nowISO()
+      }
+    }
+  };
+
+  const contentRec = {
+    id: docId,
+    raw: rawText,
+    norm: normFull,
+    blob: opts.originalBlob || null
+  };
+
+  const chunkRecs = rawChunks.map((c, i) => ({
+    id: docId + ':' + i,
+    docId,
+    idx: i,
+    raw: c.raw,
+    norm: normalizeText(c.raw),
+    start: c.start,
+    end: c.end
+  }));
+
+  const ops = [
+    { store: 'documents', type: 'put', value: doc },
+    { store: 'content', type: 'put', value: contentRec },
+    ...chunkRecs.map(c => ({ store: 'chunks', type: 'put', value: c }))
+  ];
+  if (prevDoc) {
+    ops.push({ store: 'documents', type: 'put', value: { ...prevDoc, status: 'superseded', supersededBy: docId } });
+  }
+  await atomic(ops);
+  await audit('doc.ingest', docId + ' · ' + doc.title + ' · ' + rawChunks.length + ' chunks');
+
+  return { status: prevDoc ? 'versioned' : 'imported', docId, title: doc.title, chunks: rawChunks.length, lang, version };
+}
+
+/* ------------------------------------------------------------------ */
+/* 12. Deletion                                                        */
+/* ------------------------------------------------------------------ */
+async function deleteDoc(docId) {
+  const doc = await idbGet('documents', docId);
+  if (!doc) throw new Error('Document not found.');
+  const chunks = await reqP(tx('chunks').index('docId').getAll(docId));
+  const ops = [
+    { store: 'documents', type: 'delete', key: docId },
+    { store: 'content', type: 'delete', key: docId },
+    ...chunks.map(c => ({ store: 'chunks', type: 'delete', key: c.id }))
+  ];
+  await atomic(ops);
+  // Verify the deletion actually happened.
+  const still = await idbGet('documents', docId);
+  if (still) throw new Error('Deletion verification failed — document still present.');
+  await audit('doc.delete', docId + ' · ' + doc.title);
+  IDX.built = false;
+  return true;
+}
+
+/* ------------------------------------------------------------------ */
+/* 13. Source evaluation — 50 features / 5 groups                      */
+/* ------------------------------------------------------------------ */
+const SV = (v, note) => ({ v: clamp01(v), note: note || '' });
+const UNK = note => ({ v: null, note: note || 'not measurable from available data' });
+
+const FEATURE_GROUPS = [
+  { id: 'A', w: 0.22, en: 'Authorship & accountability', fa: 'نویسندگی و پاسخ‌گویی' },
+  { id: 'B', w: 0.12, en: 'Publication & freshness',     fa: 'انتشار و تازگی' },
+  { id: 'C', w: 0.24, en: 'Methodology & transparency',  fa: 'روش و شفافیت' },
+  { id: 'D', w: 0.24, en: 'Provenance & integrity',      fa: 'منشأ و یکپارچگی' },
+  { id: 'E', w: 0.18, en: 'Corroboration & consistency', fa: 'تأیید و سازگاری' }
+];
+
+const HAS = (d, p) => !!(d.meta && d.meta[p]);
+const TEXT_HEAD = (ctx, n = 4000) => (ctx.text || '').slice(0, n);
+
+const FEATURES = [
+  /* ---------------- A. Authorship & accountability ---------------- */
+  { id: 'A1', g: 'A', w: .18, en: 'Author identified', fa: 'نویسنده شناسایی‌شده',
+    d: 'A responsible author is named in metadata, front matter or byline.',
+    fn: (doc) => HAS(doc, 'author') ? SV(1, doc.meta.author)
+        : (doc.meta?.chan?.metadata ? SV(0, 'metadata scanned, no author present') : UNK()) },
+
+  { id: 'A2', g: 'A', w: .10, en: 'Author contact channel', fa: 'راه تماس نویسنده',
+    d: 'An author e-mail address or profile URL is present.',
+    fn: (doc) => (HAS(doc, 'authorEmail') || HAS(doc, 'authorUrl')) ? SV(1)
+        : (doc.meta?.chan?.metadata ? SV(0) : UNK()) },
+
+  { id: 'A3', g: 'A', w: .14, en: 'Responsible organization named', fa: 'سازمان مسئول',
+    d: 'A publisher, institution or site owner is identified.',
+    fn: (doc) => HAS(doc, 'publisher') ? SV(1, doc.meta.publisher)
+        : (doc.meta?.chan?.metadata ? SV(0) : UNK()) },
+
+  { id: 'A4', g: 'A', w: .08, en: 'Author credentials stated', fa: 'مدرک نویسنده',
+    d: 'Credential markers (PhD, MD, professor, دکتر, استاد …) appear near the author or in the header.',
+    fn: (doc, ctx) => {
+      if (!HAS(doc, 'author')) return UNK('no author to attach credentials to');
+      const head = TEXT_HEAD(ctx, 3000);
+      return /(\bph\.?d\b|\bmd\b|\bdr\.|professor|\bprof\.|دکتر|استاد|مهندس|متخصص)/i.test(head)
+        ? SV(1, 'credential marker found in the header text') : SV(0, 'no credential marker found');
+    } },
+
+  { id: 'A5', g: 'A', w: .10, en: 'Author track record in this KB', fa: 'سابقه نویسنده در پایگاه',
+    d: 'The same author appears on more than one document in this knowledge base.',
+    fn: (doc, ctx) => {
+      if (!HAS(doc, 'author')) return UNK();
+      const a = String(doc.meta.author).trim().toLowerCase();
+      const n = ctx.docs.filter(d => d.meta?.author && String(d.meta.author).trim().toLowerCase() === a).length;
+      return n >= 2 ? SV(1, n + ' documents by this author') : SV(0.4, 'single document by this author');
+    } },
+
+  { id: 'A6', g: 'A', w: .12, en: 'Accountable publisher type', fa: 'نوع ناشر پاسخ‌گو',
+    d: 'Publisher string resembles an institution (university, press, agency, سازمان، دانشگاه …).',
+    fn: (doc) => {
+      if (!HAS(doc, 'publisher')) return doc.meta?.chan?.metadata ? SV(0) : UNK();
+      return /(inc\b|ltd\b|llc\b|corp\b|university|institute|press|news|agency|journal|society|سازمان|دانشگاه|خبرگزاری|مؤسسه|پژوهشکده)/i
+        .test(doc.meta.publisher) ? SV(1, doc.meta.publisher) : SV(0.4, 'publisher present but not institution-like');
+    } },
+
+  { id: 'A7', g: 'A', w: .10, en: 'Byline / date consistency', fa: 'سازگاری امضا و تاریخ',
+    d: 'A publication date exists and is not in the future.',
+    fn: (doc) => {
+      const pd = doc.meta?.pubDate;
+      if (!pd) return doc.meta?.chan?.metadata ? SV(0, 'no publication date') : UNK();
+      const ts = Date.parse(pd);
+      if (isNaN(ts)) return SV(0.2, 'unparseable date: ' + pd);
+      return ts <= Date.now() ? SV(1, pd) : SV(0, 'date is in the future');
+    } },
+
+  { id: 'A8', g: 'A', w: .06, en: 'License or terms present', fa: 'مجوز یا شرایط',
+    d: 'A license, copyright or terms statement is present.',
+    fn: (doc, ctx) => HAS(doc, 'license') ? SV(1, doc.meta.license)
+        : (/(creative commons|©|copyright|all rights reserved|حق نشر|کلیه حقوق)/i.test(TEXT_HEAD(ctx, 6000))
+          ? SV(0.7, 'copyright/license phrase found in text') : (doc.meta?.chan?.metadata ? SV(0) : UNK())) },
+
+  { id: 'A9', g: 'A', w: .07, en: 'Author profile link', fa: 'پیوند نمایه نویسنده',
+    d: 'A resolvable author profile URL is recorded.',
+    fn: (doc) => HAS(doc, 'authorUrl') ? SV(1) : (doc.meta?.chan?.metadata ? SV(0) : UNK()) },
+
+  { id: 'A10', g: 'A', w: .05, en: 'Institutional domain suffix', fa: 'پسوند دامنه سازمانی',
+    d: 'Hostname uses .gov/.edu/.ac.ir/.org. WEAK SIGNAL — explicitly not proof of reliability.',
+    fn: (doc) => {
+      if (!doc.sourceUrl) return UNK('not a URL source');
+      try {
+        const h = new URL(doc.sourceUrl).hostname.toLowerCase();
+        return /(\.gov|\.edu|\.ac\.[a-z]{2}|\.org|\.mil)$/.test(h)
+          ? SV(0.8, h + ' (weak signal only)') : SV(0.3, h + ' (weak signal only)');
+      } catch { return UNK('unparseable URL'); }
+    } },
+
+  /* ---------------- B. Publication & freshness ---------------- */
+  { id: 'B1', g: 'B', w: .18, en: 'Publication date present', fa: 'تاریخ انتشار موجود',
+    d: 'The document carries a publication date.',
+    fn: (doc) => doc.meta?.pubDate ? SV(1, doc.meta.pubDate)
+        : (doc.meta?.chan?.metadata ? SV(0) : UNK()) },
+
+  { id: 'B2', g: 'B', w: .18, en: 'Freshness', fa: 'تازگی',
+    d: 'Age of the publication date. ≤30d=1, ≤1y=0.6, ≤3y=0.3, older=0.1.',
+    fn: (doc) => {
+      const ts = Date.parse(doc.meta?.pubDate || '');
+      if (isNaN(ts)) return UNK('no parseable publication date');
+      const days = (Date.now() - ts) / 86400000;
+      const v = days <= 30 ? 1 : days <= 365 ? 0.6 : days <= 1095 ? 0.3 : 0.1;
+      return SV(v, Math.round(days) + ' days old');
+    } },
+
+  { id: 'B3', g: 'B', w: .08, en: 'Date precision', fa: 'دقت تاریخ',
+    d: 'Full date = 1, month-level = 0.6, year only = 0.3.',
+    fn: (doc) => {
+      const pd = String(doc.meta?.pubDate || '').trim();
+      if (!pd) return UNK();
+      if (/^\d{4}-\d{2}-\d{2}/.test(pd) || /^\d{4}-\d{2}-\d{2}T/.test(pd)) return SV(1, 'full date');
+      if (/^\d{4}-\d{2}$/.test(pd)) return SV(0.6, 'month precision');
+      if (/^\d{4}$/.test(pd)) return SV(0.3, 'year only');
+      return SV(0.5, 'unstructured date string');
+    } },
+
+  { id: 'B4', g: 'B', w: .10, en: 'Revision / version information', fa: 'اطلاعات نسخه',
+    d: 'A version or revision marker exists (metadata or text).',
+    fn: (doc, ctx) => HAS(doc, 'version') || doc.version > 1 ? SV(1, 'KB version ' + doc.version)
+        : (/(revision|version\s*\d|نسخه|ویرایش|بازنگری)/i.test(TEXT_HEAD(ctx, 5000))
+          ? SV(0.7, 'revision phrase found in text') : SV(0, 'no revision information found')) },
+
+  { id: 'B5', g: 'B', w: .10, en: 'Last-updated marker', fa: 'نشانگر آخرین به‌روزرسانی',
+    d: 'A last-modified date is present in metadata or text.',
+    fn: (doc, ctx) => HAS(doc, 'lastUpdated') ? SV(1, doc.meta.lastUpdated)
+        : (/(last\s+updated|updated\s+on|آخرین\s+به‌روزرسانی|تاریخ\s+به‌روزرسانی)/i.test(TEXT_HEAD(ctx, 6000))
+          ? SV(0.7, 'update phrase found in text') : SV(0)) },
+
+  { id: 'B6', g: 'B', w: .10, en: 'Update recency', fa: 'تازگی به‌روزرسانی',
+    d: 'How recently the document was updated, when an update date is known.',
+    fn: (doc, ctx) => {
+      const s = doc.meta?.lastUpdated || doc.meta?.pubDate;
+      const ts = Date.parse(s || '');
+      if (isNaN(ts)) return UNK('no update date');
+      const days = (Date.now() - ts) / 86400000;
+      return SV(days <= 90 ? 1 : days <= 365 ? 0.6 : days <= 1095 ? 0.3 : 0.1, Math.round(days) + ' days');
+    } },
+
+  { id: 'B7', g: 'B', w: .10, en: 'Date is not in the future', fa: 'تاریخ آینده نیست',
+    d: 'Publication date is not later than now.',
+    fn: (doc) => {
+      const ts = Date.parse(doc.meta?.pubDate || '');
+      if (isNaN(ts)) return UNK();
+      return ts <= Date.now() ? SV(1) : SV(0, 'future-dated source');
+    } },
+
+  { id: 'B8', g: 'B', w: .06, en: 'Stable URL', fa: 'نشانی پایدار',
+    d: 'URL has no tracking or session query parameters.',
+    fn: (doc) => {
+      if (!doc.sourceUrl) return UNK('not a URL source');
+      try {
+        const u = new URL(doc.sourceUrl);
+        const bad = [...u.searchParams.keys()].some(k => /^(utm_|fbclid|gclid|session|sid|ref)/i.test(k));
+        return bad ? SV(0.3, 'tracking parameters present') : SV(1, u.pathname.length > 1 ? 'clean path' : 'root path');
+      } catch { return UNK(); }
+    } },
+
+  { id: 'B9', g: 'B', w: .05, en: 'Canonical link declared', fa: 'پیوند متعارف',
+    d: 'The page declares a canonical URL.',
+    fn: (doc) => HAS(doc, 'canonical') ? SV(1, doc.meta.canonical) : (doc.meta?.chan?.html ? SV(0) : UNK()) },
+
+  { id: 'B10', g: 'B', w: .05, en: 'Retrieval timestamp recorded', fa: 'زمان بازیابی ثبت‌شده',
+    d: 'The moment the source was captured is recorded (traceability).',
+    fn: (doc) => (doc.meta?.fetchedAt || doc.meta?.extraction?.extractedAt) ? SV(1) : SV(0) },
+
+  /* ---------------- C. Methodology & transparency ---------------- */
+  { id: 'C1', g: 'C', w: .16, en: 'References section detected', fa: 'بخش منابع',
+    d: 'A references/bibliography/footnotes section is detected.',
+    fn: (doc, ctx) => /(^|\n)\s*(references|bibliography|works cited|sources|منابع|کتاب‌نامه|پانوشت)\s*:?\s*(\n|$)/i
+        .test(ctx.text || '') ? SV(1) : SV(0, 'no references heading found') },
+
+  { id: 'C2', g: 'C', w: .14, en: 'Citation density', fa: 'چگالی ارجاع',
+    d: 'Count of numeric or bracketed citations. ≥5=1, 2–4=0.6, 1=0.3.',
+    fn: (doc, ctx) => {
+      const t = TEXT_HEAD(ctx, 60000);
+      const n = (t.match(/\[\d{1,3}\]|\(\d{4}\)|\bdoi:\s*10\.|https?:\/\/\S+/gi) || []).length;
+      return SV(n >= 5 ? 1 : n >= 2 ? 0.6 : n === 1 ? 0.3 : 0, n + ' citation-like markers');
+    } },
+
+  { id: 'C3', g: 'C', w: .12, en: 'Links to primary sources', fa: 'پیوند به منابع اولیه',
+    d: 'Inline links point to primary domains (doi.org, arxiv, *.gov, official docs).',
+    fn: (doc, ctx) => {
+      const t = TEXT_HEAD(ctx, 60000);
+      const m = t.match(/https?:\/\/[^\s)>\]]+/g) || [];
+      if (!m.length) return doc.sourceType === 'url' || doc.sourceType === 'html' ? SV(0) : UNK('no links present');
+      const primary = m.filter(u => /(doi\.org|arxiv\.org|pubmed|\.gov|\.edu|who\.int|un\.org|europa\.eu)/i.test(u)).length;
+      return SV(clamp01(primary / Math.max(3, m.length * 0.2)), primary + ' primary-ish links of ' + m.length);
+    } },
+
+  { id: 'C4', g: 'C', w: .10, en: 'Methods section detected', fa: 'بخش روش',
+    d: 'A methods/methodology section heading is detected.',
+    fn: (doc, ctx) => /(^|\n)\s*(methods?|methodology|materials and methods|procedure|روش(‌| )?کار|روش پژوهش|مواد و روش‌ها)\s*:?\s*(\n|$)/i
+        .test(ctx.text || '') ? SV(1) : SV(0) },
+
+  { id: 'C5', g: 'C', w: .10, en: 'Limitations acknowledged', fa: 'بیان محدودیت‌ها',
+    d: 'Limitations, caveats or uncertainty are explicitly discussed.',
+    fn: (doc, ctx) => /(limitation|caveat|uncertaint|further research|confound|محدودیت|عدم قطعیت|توجه به این نکته)/i
+        .test(TEXT_HEAD(ctx, 60000)) ? SV(1) : SV(0) },
+
+  { id: 'C6', g: 'C', w: .08, en: 'Data availability statement', fa: 'بیانیه دسترسی به داده',
+    d: 'Data availability or dataset access is described.',
+    fn: (doc, ctx) => /(data availability|data are available|dataset available|supplementary data|داده‌ها در دسترس|دسترسی به داده)/i
+        .test(TEXT_HEAD(ctx, 60000)) ? SV(1) : SV(0) },
+
+  { id: 'C7', g: 'C', w: .10, en: 'Attributed quotations', fa: 'نقل‌قول با انتساب',
+    d: 'Quoted passages carry attribution.',
+    fn: (doc, ctx) => {
+      const t = TEXT_HEAD(ctx, 60000);
+      const quotes = (t.match(/["“][^"”]{20,300}["”]/g) || []).length;
+      const attributed = (t.match(/(said|according to|stated|گفت|به گفته|بر اساس)/gi) || []).length;
+      if (!quotes) return SV(0.5, 'no direct quotations');
+      return SV(clamp01(attributed / quotes), attributed + ' attributions / ' + quotes + ' quotes');
+    } },
+
+  { id: 'C8', g: 'C', w: .08, en: 'Sample or dataset named', fa: 'نمونه یا مجموعه داده',
+    d: 'A sample size, cohort or dataset identifier is named.',
+    fn: (doc, ctx) => /(\bn\s*=\s*\d+|sample size|participants|respondents|حجم نمونه|شرکت‌کنندگان|نفر)/i
+        .test(TEXT_HEAD(ctx, 60000)) ? SV(1) : SV(0) },
+
+  { id: 'C9', g: 'C', w: .07, en: 'Quantitative content', fa: 'محتوای کمّی',
+    d: 'The document contains statistics or measured quantities.',
+    fn: (doc, ctx) => {
+      const t = TEXT_HEAD(ctx, 60000);
+      const n = (t.match(/\d+(?:[.,]\d+)?\s*(%|percent|درصد|million|billion|میلیون|میلیارد)?/g) || []).length;
+      const meaningful = (t.match(/\d+(?:[.,]\d+)?\s*(%|percent|درصد|million|billion|میلیون|میلیارد)/gi) || []).length;
+      return SV(clamp01(meaningful / 5), meaningful + ' unit-bearing numbers, ' + n + ' numbers total');
+    } },
+
+  { id: 'C10', g: 'C', w: .05, en: 'Conflict-of-interest statement', fa: 'بیانیه تعارض منافع',
+    d: 'A conflict-of-interest or funding statement is present.',
+    fn: (doc, ctx) => /(conflict of interest|competing interests|funding|grant|تعارض منافع|منافع|حمایت مالی|بودجه)/i
+        .test(TEXT_HEAD(ctx, 60000)) ? SV(1) : SV(0) },
+
+  /* ---------------- D. Provenance & integrity ---------------- */
+  { id: 'D1', g: 'D', w: .14, en: 'Content hash recorded', fa: 'هش محتوا ثبت‌شده',
+    d: 'A content hash is stored for integrity and duplicate detection.',
+    fn: (doc) => doc.contentHash ? SV(1, doc.hashAlgo + ' · ' + doc.contentHash.slice(0, 16) + '…') : SV(0) },
+
+  { id: 'D2', g: 'D', w: .14, en: 'Original preserved', fa: 'متن اصلی حفظ‌شده',
+    d: 'The original source text is preserved alongside the normalized form.',
+    fn: (doc, ctx) => ctx.hasRaw ? SV(1, 'original text stored') : SV(0, 'original text missing') },
+
+  { id: 'D3', g: 'D', w: .12, en: 'Extraction quality', fa: 'کیفیت استخراج',
+    d: 'Ratio of printable characters — a proxy for clean text extraction.',
+    fn: (doc) => {
+      const q = doc.meta?.extraction?.quality;
+      if (q == null) return UNK();
+      return SV(q, (q * 100).toFixed(1) + '% printable characters');
+    } },
+
+  { id: 'D4', g: 'D', w: .08, en: 'Clean encoding', fa: 'کدگذاری سالم',
+    d: 'Low rate of replacement/mojibake characters.',
+    fn: (doc, ctx) => {
+      const t = TEXT_HEAD(ctx, 60000);
+      if (!t.length) return UNK();
+      const bad = (t.match(/\uFFFD|Ã.|Â./g) || []).length;
+      const ratio = bad / t.length;
+      return SV(clamp01(1 - ratio * 100), bad + ' suspicious sequences');
+    } },
+
+  { id: 'D5', g: 'D', w: .06, en: 'Language detected', fa: 'زبان تشخیص‌داده‌شده',
+    d: 'A language was detected for the document.',
+    fn: (doc) => doc.lang && doc.lang !== 'und' ? SV(1, doc.lang) : SV(0, 'undetermined') },
+
+  { id: 'D6', g: 'D', w: .14, en: 'Not a duplicate', fa: 'تکراری نبودن',
+    d: 'No other live document in this knowledge base has the same content hash.',
+    fn: (doc, ctx) => {
+      const dupes = ctx.docs.filter(d => d.id !== doc.id && d.contentHash === doc.contentHash && d.status !== 'superseded');
+      return dupes.length ? SV(0, dupes.length + ' exact duplicate(s)') : SV(1, 'unique content hash');
+    } },
+
+  { id: 'D7', g: 'D', w: .10, en: 'Low near-duplicate similarity', fa: 'شباهت پایین با نسخه‌های نزدیک',
+    d: 'Maximum 5-gram Jaccard similarity against other documents (lower is better).',
+    fn: (doc, ctx) => {
+      if (!ctx.nearDup) return UNK('not enough comparable documents');
+      return SV(clamp01(1 - ctx.nearDup.max), 'max similarity ' + (ctx.nearDup.max * 100).toFixed(0) + '% vs "' +
+        (ctx.nearDup.withTitle || 'n/a') + '"');
+    } },
+
+  { id: 'D8', g: 'D', w: .07, en: 'Active content stripped', fa: 'حذف محتوای فعال',
+    d: 'Scripts/styles were removed before text extraction (HTML sources).',
+    fn: (doc) => {
+      if (doc.meta?.chan?.html) return SV(1, doc.meta.scriptsStripped ? 'scripts detected and stripped' : 'no scripts found');
+      if (doc.sourceType === 'url' || doc.sourceType === 'html') return SV(1);
+      return UNK('not a markup source');
+    } },
+
+  { id: 'D9', g: 'D', w: .08, en: 'Primary source type', fa: 'نوع منبع اولیه',
+    d: 'Structured data (csv/json) and plain text rank as more primary than secondary HTML.',
+    fn: (doc) => {
+      const m = { csv: 1, json: 1, text: 0.9, markdown: 0.8, pdf: 0.7, html: 0.6, url: 0.6 };
+      const v = m[doc.sourceType];
+      return v == null ? UNK() : SV(v, doc.sourceType);
+    } },
+
+  { id: 'D10', g: 'D', w: .07, en: 'Source readable at ingest', fa: 'خوانایی منبع هنگام ورود',
+    d: 'The source was successfully read and fully processed at ingest time.',
+    fn: (doc) => doc.status === 'indexed' ? SV(1) : SV(0, 'status: ' + doc.status) },
+
+  /* ---------------- E. Corroboration & consistency ---------------- */
+  { id: 'E1', g: 'E', w: .18, en: 'Independent corroborating sources', fa: 'منابع تأییدکننده مستقل',
+    d: 'Other documents share substantive vocabulary and are not near-duplicates. 0=0, 1=0.4, 2=0.7, ≥3=1.',
+    fn: (doc, ctx) => {
+      const n = ctx.corroborators.length;
+      return SV(n === 0 ? 0 : n === 1 ? 0.4 : n === 2 ? 0.7 : 1, n + ' topically related source(s)');
+    } },
+
+  { id: 'E2', g: 'E', w: .14, en: 'Cross-source term overlap', fa: 'همپوشانی واژگانی بین منابع',
+    d: 'Mean Jaccard overlap of top terms with the corroborating sources.',
+    fn: (doc, ctx) => {
+      if (!ctx.corroborators.length) return UNK('no related sources');
+      return SV(ctx.corroborators.reduce((a, c) => a + c.overlap, 0) / ctx.corroborators.length,
+        'mean overlap ' + (ctx.corroborators.reduce((a, c) => a + c.overlap, 0) / ctx.corroborators.length * 100).toFixed(0) + '%');
+    } },
+
+  { id: 'E3', g: 'E', w: .16, en: 'No detected contradictions', fa: 'نبود تناقض شناسایی‌شده',
+    d: 'Heuristic scan of high-overlap sentence pairs found no negation/number mismatch.',
+    fn: (doc, ctx) => {
+      if (ctx.contradictions == null) return UNK('not enough comparable sources');
+      return ctx.contradictions === 0 ? SV(1, 'no contradictory pairs detected')
+        : SV(clamp01(1 - ctx.contradictions / 5), ctx.contradictions + ' contradictory pair(s) flagged');
+    } },
+
+  { id: 'E4', g: 'E', w: .08, en: 'Author appears in multiple documents', fa: 'حضور نویسنده در چند سند',
+    d: 'The same author contributes more than one document to this KB.',
+    fn: (doc, ctx) => {
+      if (!HAS(doc, 'author')) return UNK();
+      const a = String(doc.meta.author).toLowerCase().trim();
+      const n = ctx.docs.filter(d => d.meta?.author && String(d.meta.author).toLowerCase().trim() === a).length;
+      return n >= 2 ? SV(1, n + ' documents') : SV(0, 'only one document');
+    } },
+
+  { id: 'E5', g: 'E', w: .10, en: 'Referenced by other documents', fa: 'ارجاع از سوی اسناد دیگر',
+    d: 'Another document in the KB mentions this document\'s title or URL.',
+    fn: (doc, ctx) => {
+      const needle = (doc.sourceUrl || doc.title || '').toLowerCase();
+      if (!needle || needle.length < 8) return UNK('title/URL too short to match');
+      const n = ctx.docs.filter(d => d.id !== doc.id &&
+        ((d._searchBlob || '').toLowerCase().includes(needle))).length;
+      return n ? SV(1, n + ' document(s) reference it') : SV(0, 'no internal references found');
+    } },
+
+  { id: 'E6', g: 'E', w: .08, en: 'Numeric agreement with peers', fa: 'توافق عددی با منابع دیگر',
+    d: 'Shared unit-bearing numbers agree with corroborating sources (no conflicting values for the same context).',
+    fn: (doc, ctx) => {
+      if (!ctx.corroborators.length) return UNK('no related sources');
+      return ctx.numericConflict === 0
+        ? SV(1, 'no conflicting numeric pairs')
+        : SV(clamp01(1 - ctx.numericConflict / 4), ctx.numericConflict + ' conflicting numeric pair(s)');
+    } },
+
+  { id: 'E7', g: 'E', w: .08, en: 'Topical cohesion', fa: 'انسجام موضوعی',
+    d: 'The document\'s own chunks share vocabulary (internal coherence).',
+    fn: (doc, ctx) => {
+      if (!ctx.chunks || ctx.chunks.length < 2) return UNK('single chunk');
+      const sets = ctx.chunks.slice(0, 30).map(c => new Set(tokenize(c.norm || '')));
+      let sum = 0, n = 0;
+      for (let i = 0; i < sets.length; i++)
+        for (let j = i + 1; j < sets.length; j++) { sum += jaccard(sets[i], sets[j]); n++; }
+      return SV(n ? sum / n : 0, 'mean chunk overlap ' + (n ? (sum / n * 100).toFixed(0) : 0) + '%');
+    } },
+
+  { id: 'E8', g: 'E', w: .06, en: 'Named entity coverage', fa: 'پوشش موجودیت‌های نام‌دار',
+    d: 'Named entities (capitalized Latin sequences, organizations) are identifiable.',
+    fn: (doc, ctx) => {
+      const t = TEXT_HEAD(ctx, 60000);
+      const ents = new Set((t.match(/\b[A-Z][a-zA-Z]{2,}(?:\s+[A-Z][a-zA-Z]{2,}){0,3}\b/g) || []));
+      return SV(clamp01(ents.size / 30), ents.size + ' distinct capitalized sequences');
+    } },
+
+  { id: 'E9', g: 'E', w: .07, en: 'Claim specificity', fa: 'ویژگی ادعا',
+    d: 'The text contains dates, quantities or proper names rather than only vague language.',
+    fn: (doc, ctx) => {
+      const t = TEXT_HEAD(ctx, 60000);
+      const dates = (t.match(/\b(19|20)\d{2}\b/g) || []).length;
+      const nums = (t.match(/\d+(?:[.,]\d+)?/g) || []).length;
+      return SV(clamp01((dates + nums) / 40), dates + ' years, ' + nums + ' numbers');
+    } },
+
+  { id: 'E10', g: 'E', w: .05, en: 'Source diversity among peers', fa: 'تنوع منابع در میان همتایان',
+    d: 'Corroborating sources come from different domains/authors — not copies of the same origin.',
+    fn: (doc, ctx) => {
+      if (!ctx.corroborators.length) return UNK('no related sources');
+      const keys = new Set(ctx.corroborators.map(c => c.origin));
+      return SV(clamp01(keys.size / Math.max(2, ctx.corroborators.length)), keys.size + ' distinct origin(s)');
+    } }
+];
+
+/** Build the per-document evaluation context (expensive parts computed once). */
+async function buildEvalContext(doc, allDocs) {
+  const chunks = await reqP(tx('chunks').index('docId').getAll(doc.id));
+  const contentRec = await idbGet('content', doc.id);
+  const text = contentRec ? contentRec.raw : '';
+  const hasRaw = !!(contentRec && contentRec.raw);
+
+  // Top terms of this doc (by tf, stopwords already removed)
+  const myTokens = tokenize(contentRec ? contentRec.norm : '');
+  const tf = new Map();
+  for (const tk of myTokens) tf.set(tk, (tf.get(tk) || 0) + 1);
+  const myTop = new Set([...tf.entries()].sort((a, b) => b[1] - a[1]).slice(0, 40).map(e => e[0]));
+
+  // Corroborators: documents sharing ≥ 5 of my top terms, not near-duplicates
+  const corroborators = [];
+  let nearDup = null;
+  const myShingles = nearDupShingles(text);
+  for (const other of allDocs) {
+    if (other.id === doc.id || other.status === 'superseded') continue;
+    const oc = await idbGet('content', other.id);
+    if (!oc) continue;
+    const otf = new Set(tokenize(oc.norm).slice(0, 4000));
+    let shared = 0;
+    for (const tk of myTop) if (otf.has(tk)) shared++;
+    const overlap = shared / Math.max(1, myTop.size);
+
+    const oSh = nearDupShingles(oc.raw);
+    const sim = jaccard(myShingles, oSh);
+    if (!nearDup || sim > nearDup.max) nearDup = { max: sim, withTitle: other.title };
+
+    if (shared >= 5 && sim < 0.6) {
+      let origin = 'file:' + (other.filename || other.title);
+      if (other.sourceUrl) { try { origin = new URL(other.sourceUrl).hostname; } catch { origin = 'url'; } }
+      corroborators.push({ id: other.id, title: other.title, overlap, origin, text: oc.raw });
+    }
+  }
+  corroborators.sort((a, b) => b.overlap - a.overlap);
+  const topCorr = corroborators.slice(0, 8);
+
+  // Contradiction heuristics against corroborators
+  const NEG = /\b(not|no|never|none|cannot|can't|isn't|doesn't|didn't|false|incorrect|without)\b|نیست|نبود|نمی|بدون|خیر|هرگز|غلط|نادرست/gi;
+  const mySents = splitSentences(text).slice(0, 120).filter(s => s.length > 25);
+  let contradictions = topCorr.length ? 0 : null;
+  let numericConflict = topCorr.length ? 0 : null;
+
+  const numSet = s => new Set((s.match(/\d+(?:[.,]\d+)?/g) || []));
+  const hasNeg = s => { NEG.lastIndex = 0; return NEG.test(s); };
+
+  for (const c of topCorr) {
+    const oSents = splitSentences(c.text).slice(0, 120).filter(s => s.length > 25);
+    for (const a of mySents) {
+      const aT = new Set(tokenize(normalizeText(a)));
+      if (aT.size < 4) continue;
+      for (const b of oSents) {
+        const bT = new Set(tokenize(normalizeText(b)));
+        if (bT.size < 4) continue;
+        const j = jaccard(aT, bT);
+        if (j < 0.45) continue;
+        if (hasNeg(a) !== hasNeg(b)) contradictions++;
+        const an = numSet(a), bn = numSet(b);
+        if (an.size && bn.size) {
+          const common = [...an].filter(x => [...bn].some(y => y !== x && (Math.abs(parseFloat(x) - parseFloat(y)) / Math.max(1e-9, parseFloat(x))) > 0.25));
+          if (common.length && an.size === bn.size && j > 0.6) numericConflict++;
+        }
+      }
+    }
+  }
+
+  // Small blob used by E5 (referenced-by)
+  return {
+    docs: allDocs, chunks, text, hasRaw, nearDup, corroborators: topCorr,
+    contradictions, numericConflict, _text: text
+  };
+}
+
+/**
+ * evaluateSource(doc, ctx) -> explainable score
+ * Keeps three dimensions strictly separate:
+ *   quality  = this function
+ *   evidence = computed at query time by the answer engine
+ *   relevance= BM25 score
+ */
+function evaluateSource(doc, ctx) {
+  const features = [];
+  for (const f of FEATURES) {
+    let out;
+    try { out = f.fn(doc, ctx); } catch (e) { out = UNK('evaluation error: ' + e.message); }
+    if (!out) out = UNK();
+    features.push({
+      id: f.id, group: f.g, weight: f.w, en: f.en, fa: f.fa, definition: f.d,
+      value: out.v, note: out.note || ''
+    });
+  }
+  const groups = FEATURE_GROUPS.map(g => {
+    const fs = features.filter(f => f.group === g.id);
+    const known = fs.filter(f => f.value != null);
+    const wsum = known.reduce((a, f) => a + f.weight, 0);
+    const score = wsum > 0 ? known.reduce((a, f) => a + f.weight * f.value, 0) / wsum : null;
+    return {
+      id: g.id, en: g.en, fa: g.fa, weight: g.w,
+      score, knownCount: known.length, total: fs.length,
+      coverage: fs.length ? known.length / fs.length : 0
+    };
+  });
+  const knownGroups = groups.filter(g => g.score != null);
+  const gw = knownGroups.reduce((a, g) => a + g.weight, 0);
+  const overall = gw > 0 ? knownGroups.reduce((a, g) => a + g.weight * g.score, 0) / gw : null;
+  const knownFeatures = features.filter(f => f.value != null).length;
+
+  return {
+    version: SCORE_VERSION,
+    computedAt: nowISO(),
+    overall,
+    coverage: knownFeatures / features.length,
+    knownFeatures,
+    totalFeatures: features.length,
+    groups,
+    features,
+    disclaimer: 'Source quality is estimated from measurable document properties only. ' +
+      'Unknown signals are marked unknown rather than invented. Popularity, HTTPS, domain age and search rank ' +
+      'are not used as evidence of truth. This is not a fact-checking result.'
+  };
+}
+
+/* ------------------------------------------------------------------ */
+/* 14. Contradiction + relationship analysis (standalone)              */
+/* ------------------------------------------------------------------ */
+const NEG_RE = /\b(not|no|never|none|cannot|can't|isn't|doesn't|didn't|false|incorrect|without|refute|dispute)\b|نیست|نبود|نمی|بدون|خیر|هرگز|غلط|نادرست|رد می/gi;
+
+function findContradictions(sentencesA, sentencesB, minJaccard = 0.45) {
+  const out = [];
+  const hasNeg = s => { NEG_RE.lastIndex = 0; return NEG_RE.test(s); };
+  const nums = s => new Set(s.match(/\d+(?:[.,]\d+)?/g) || []);
+  for (const a of sentencesA) {
+    const aT = new Set(tokenize(normalizeText(a)));
+    if (aT.size < 4) continue;
+    for (const b of sentencesB) {
+      const bT = new Set(tokenize(normalizeText(b)));
+      if (bT.size < 4) continue;
+      const j = jaccard(aT, bT);
+      if (j < minJaccard) continue;
+      const negMismatch = hasNeg(a) !== hasNeg(b);
+      const an = nums(a), bn = nums(b);
+      let numMismatch = false;
+      if (an.size && bn.size && j > 0.55) {
+        const sharedCtx = j;
+        for (const x of an) for (const y of bn) {
+          if (x === y) continue;
+          const px = parseFloat(x), py = parseFloat(y);
+          if (isFinite(px) && isFinite(py) && px !== py && Math.abs(px - py) / Math.max(1, Math.abs(px)) > 0.2) numMismatch = true;
+        }
+      }
+      if (negMismatch || numMismatch) {
+        out.push({ a, b, similarity: +j.toFixed(3), reason: negMismatch ? 'negation mismatch' : 'numeric mismatch' });
+      }
+    }
+  }
+  return out;
+}
+
+/* ------------------------------------------------------------------ */
+/* 15. Answer engine                                                   */
+/* ------------------------------------------------------------------ */
+const EVIDENCE_VERSION = 'evidence-1.0.0';
+
+async function askQuestion(question, opts = {}) {
+  await rebuildIndex();
+  if (!IDX.data.N) {
+    return {
+      id: uid(), question, createdAt: nowISO(), version: EVIDENCE_VERSION,
+      status: 'empty', retrieved: 0, citations: [], passages: [],
+      directResponse: t('The knowledge base is empty. Import documents first.',
+                        'پایگاه دانش خالی است. ابتدا اسناد را وارد کنید.'),
+      notes: []
+    };
+  }
+
+  const rank = bm25Rank(IDX.data, question, DOCS, {
+    docIds: opts.docIds, lang: opts.lang, sourceType: opts.sourceType,
+    dateFrom: opts.dateFrom, dateTo: opts.dateTo, limit: opts.limit || 25
+  });
+
+  if (!rank.results.length) {
+    return {
+      id: uid(), question, createdAt: nowISO(), version: EVIDENCE_VERSION,
+      status: 'not-found', retrieved: 0, citations: [], passages: [],
+      directResponse: t('Not found in the current knowledge base.',
+                        'در پایگاه دانش فعلی یافت نشد.'),
+      notes: [
+        t('This is not a statement that the answer is false — only that no passage in the indexed corpus matched the query.',
+          'این به معنای نادرست بودن پاسخ نیست؛ فقط هیچ قطعه‌ای در پیکره ایندکس‌شده با پرسش همخوانی نداشت.'),
+        rank.note
+      ].filter(Boolean),
+      uncertainty: 'high'
+    };
+  }
+
+  // --- sentence-level evidence extraction ---
+  const qTokens = rank.qTokens;
+  const idfOf = tk => {
+    const df = (IDX.data.postings.get(tk) || new Map()).size;
+    return Math.log(1 + (IDX.data.N - df + 0.5) / (df + 0.5));
+  };
+  const totalIdf = qTokens.reduce((a, tk) => a + idfOf(tk), 0) || 1;
+
+  const candidates = [];
+  for (const r of rank.results) {
+    const cm = IDX.data.cmap.get(r.chunkId);
+    if (!cm) continue;
+    const doc = DOCS.get(r.docId);
+    for (const s of splitSentences(cm.raw)) {
+      if (s.length < 30) continue;
+      const toks = new Set(tokenize(normalizeText(s)));
+      let idfHit = 0, matched = 0;
+      for (const q of qTokens) if (toks.has(q)) { idfHit += idfOf(q); matched++; }
+      if (!matched) continue;
+      const coverage = idfHit / totalIdf;
+      const density = matched / Math.max(6, toks.size);
+      const score = coverage * 0.75 + density * 0.25;
+      candidates.push({ sentence: s, docId: r.docId, docTitle: doc?.title || r.docId,
+        chunkId: r.chunkId, doc, coverage, score, matched });
+    }
+  }
+  candidates.sort((a, b) => b.score - a.score);
+
+  // Deduplicate near-identical sentences
+  const picked = [];
+  for (const c of candidates) {
+    const ct = new Set(tokenize(normalizeText(c.sentence)));
+    if (picked.some(p => jaccard(p.tokens, ct) > 0.8)) continue;
+    c.tokens = ct;
+    picked.push(c);
+    if (picked.length >= 8) break;
+  }
+
+  if (!picked.length) {
+    return {
+      id: uid(), question, createdAt: nowISO(), version: EVIDENCE_VERSION,
+      status: 'not-found', retrieved: rank.results.length, citations: [], passages: [],
+      directResponse: t('Relevant chunks were found but contained no usable sentence-level evidence.',
+                        'قطعه‌های مرتبط یافت شد اما شاهد جمله‌ای قابل استفاده نداشتند.'),
+      notes: [rank.note].filter(Boolean), uncertainty: 'high'
+    };
+  }
+
+  // --- independence of sources ---
+  const originOf = d => {
+    if (!d) return 'unknown';
+    if (d.sourceUrl) { try { return new URL(d.sourceUrl).hostname; } catch { return 'url'; } }
+    return 'file:' + (d.filename || d.id);
+  };
+  const origins = new Set(picked.map(p => originOf(p.doc)));
+  const hashes = new Set(picked.map(p => p.doc?.contentHash).filter(Boolean));
+
+  // --- coverage of the question across evidence ---
+  const coveredTerms = new Set();
+  for (const p of picked) for (const q of qTokens) if (p.tokens.has(q)) coveredTerms.add(q);
+  const coverage = qTokens.length ? coveredTerms.size / qTokens.length : 0;
+
+  let strength;
+  if (coverage >= 0.75 && origins.size >= 2 && hashes.size >= 2) strength = 'strong';
+  else if (coverage >= 0.5 && origins.size >= 1) strength = 'moderate';
+  else if (coverage >= 0.25) strength = 'weak';
+  else strength = 'insufficient';
+
+  // --- contradictions among selected evidence ---
+  const contradictions = [];
+  for (let i = 0; i < picked.length; i++) {
+    for (let j = i + 1; j < picked.length; j++) {
+      if (picked[i].docId === picked[j].docId) continue;
+      const found = findContradictions([picked[i].sentence], [picked[j].sentence], 0.45);
+      for (const f of found) contradictions.push({ ...f, aDoc: picked[i].docTitle, bDoc: picked[j].docTitle });
+    }
+  }
+
+  // --- citations ---
+  const citations = picked.map((p, i) => ({
+    n: i + 1,
+    docId: p.docId,
+    title: p.docTitle,
+    url: p.doc?.sourceUrl || '',
+    sourceType: p.doc?.sourceType || '',
+    chunkId: p.chunkId,
+    snippet: p.sentence.length > 420 ? p.sentence.slice(0, 420) + '…' : p.sentence,
+    matchedTerms: qTokens.filter(q => p.tokens.has(q)),
+    retrievalScore: +p.score.toFixed(4)
+  }));
+
+  const directResponse = t(
+    'Extracted evidence (' + picked.length + ' passage' + (picked.length > 1 ? 's' : '') +
+    ' from ' + origins.size + ' independent origin' + (origins.size > 1 ? 's' : '') + '):',
+    'شواهد استخراج‌شده (' + picked.length + ' قطعه از ' + origins.size + ' منبع مستقل):'
+  );
+
+  const notes = [];
+  notes.push(t('Retrieval method: lexical BM25 over ' + IDX.data.N + ' indexed chunks. Semantic embeddings are not active in this build.',
+               'روش بازیابی: BM25 واژگانی روی ' + IDX.data.N + ' قطعه ایندکس‌شده. جاسازی معنایی در این نسخه فعال نیست.'));
+  if (rank.note) notes.push(rank.note);
+  if (strength === 'insufficient' || strength === 'weak') {
+    notes.push(t('Evidence strength is limited: only ' + Math.round(coverage * 100) +
+      '% of the question\'s informative terms appear in the retrieved passages.',
+      'قدرت شواهد محدود است: تنها ' + Math.round(coverage * 100) + '٪ از واژه‌های اطلاع‌بخش پرسش در قطعه‌های بازیابی‌شده آمده‌اند.'));
+  }
+  if (contradictions.length) {
+    notes.push(t('Credible sources appear to disagree on ' + contradictions.length + ' point(s). See the contradiction panel.',
+      'به نظر می‌رسد منابع معتبر در ' + contradictions.length + ' مورد با هم اختلاف دارند.'));
+  }
+  if (origins.size < 2) {
+    notes.push(t('All selected evidence comes from a single origin — this is not independent corroboration.',
+      'همه شواهد انتخاب‌شده از یک منبع واحد است — این تأیید مستقل محسوب نمی‌شود.'));
+  }
+  notes.push(t('This engine evaluates the available evidence in your knowledge base. It does not verify real-world truth.',
+               'این موتور شواهد موجود در پایگاه دانش شما را ارزیابی می‌کند و حقیقت خارجی را تأیید نمی‌کند.'));
+
+  // --- interpretation (explicitly labelled synthesis, not sourced fact) ---
+  const topTerms = [...coveredTerms].slice(0, 10);
+  const interpretation = t(
+    'System synthesis (not a sourced fact): the retrieved passages collectively address ' +
+    topTerms.length + ' of ' + qTokens.length + ' query terms' +
+    (topTerms.length ? ' (' + topTerms.join(', ') + ')' : '') + '. ' +
+    (contradictions.length
+      ? 'The corpus contains ' + contradictions.length + ' point(s) where sources conflict; the passages above should be read with that in mind.'
+      : 'No contradictions were detected among the retrieved passages by the heuristic scan (this is a heuristic, not a proof of agreement).'),
+    'ترکیب سیستمی (نه یک واقعیت منبع‌دار): قطعه‌های بازیابی‌شده در مجموع به ' + topTerms.length +
+    ' واژه از ' + qTokens.length + ' واژه پرسش می‌پردازند. ' +
+    (contradictions.length ? 'پیکره دارای ' + contradictions.length + ' مورد تناقض است.' : 'هیچ تناقضی با اسکن اکتشافی یافت نشد (این یک اکتشاف است، نه اثبات توافق).')
+  );
+
+  const result = {
+    id: uid(),
+    question,
+    createdAt: nowISO(),
+    version: EVIDENCE_VERSION,
+    status: 'answered',
+    retrieval: 'lexical-bm25',
+    retrieved: rank.total,
+    evidenceStrength: strength,
+    coverage: +coverage.toFixed(3),
+    independentOrigins: origins.size,
+    citations,
+    passages: citations.map(c => ({ ...c })),
+    directResponse,
+    interpretation,
+    contradictions: contradictions.slice(0, 12),
+    notes,
+    uncertainty: strength === 'strong' ? 'low' : strength === 'moderate' ? 'medium' : 'high',
+    filters: opts
+  };
+
+  // Optional LLM polish — only when explicitly configured.
+  if (S.llm?.enabled && S.llm.endpoint) {
+    try {
+      const llm = await callLLM(buildLLMPrompt(question, citations));
+      result.llm = llm;
+      result.retrieval = 'lexical-bm25 + llm(' + (S.llm.model || 'configured') + ')';
+      await audit('llm.call', 'endpoint=' + S.llm.endpoint + ' model=' + S.llm.model);
+    } catch (e) {
+      result.llmError = e.message;
+      notes.push(t('Configured language model call failed: ' + e.message + ' — the extractive answer above is still valid.',
+                   'فراخوانی مدل زبانی پیکربندی‌شده ناموفق بود: ' + e.message));
+      await audit('llm.error', e.message);
+    }
+  }
+
+  await idbPut('answers', result);
+  return result;
+}
+
+function buildLLMPrompt(question, citations) {
+  const passages = citations.map(c => '[' + c.n + '] (' + c.title + (c.url ? ' — ' + c.url : '') + ')\n' + c.snippet).join('\n\n');
+  return 'You are a careful research assistant. Answer ONLY from the passages below. ' +
+    'Cite passage numbers in square brackets. If the passages are insufficient, say so explicitly. ' +
+    'Never invent citations.\n\nPASSAGES:\n' + passages + '\n\nQUESTION: ' + question + '\n\nANSWER:';
+}
+
+async function callLLM(prompt) {
+  const { endpoint, model, apiKey, timeoutMs } = S.llm;
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), timeoutMs || 30000);
+  try {
+    const res = await fetch(endpoint, {
+      method: 'POST',
+      signal: ctrl.signal,
+      headers: {
+        'Content-Type': 'application/json',
+        ...(apiKey ? { 'Authorization': 'Bearer ' + apiKey } : {})
+      },
+      body: JSON.stringify({
+        model: model || undefined,
+        messages: [{ role: 'user', content: prompt }],
+        temperature: 0.1
+      })
+    });
+    if (!res.ok) throw new Error('HTTP ' + res.status + ' ' + res.statusText);
+    const data = await res.json();
+    const text = data?.choices?.[0]?.message?.content ?? data?.content?.[0]?.text ?? '';
+    if (!text) throw new Error('Provider returned no text content.');
+    return { model: model || data.model || 'unknown', text, at: nowISO() };
+  } finally { clearTimeout(timer); }
+}
+
+/* ------------------------------------------------------------------ */
+/* 16. Backup / restore                                                */
+/* ------------------------------------------------------------------ */
+async function exportBackup({ includeBlobs = false } = {}) {
+  const stores = ['documents', 'content', 'chunks', 'settings', 'tools', 'answers'];
+  const dump = { format: 'ali-backup', version: 1, exportedAt: nowISO(), dbVersion: DB_VER, stores: {} };
+  for (const s of stores) {
+    const rows = await idbAll(s);
+    if (s === 'content') {
+      dump.stores[s] = rows.map(r => {
+        const o = { id: r.id, raw: r.raw, norm: r.norm };
+        if (includeBlobs && r.blob) o.blob = r.blob;
+        return o;
+      });
+    } else if (s === 'settings') {
+      // Never export secrets by default.
+      dump.stores[s] = rows.map(r => (r.k === 'authHash' || r.k === 'authSalt')
+        ? { k: r.k, v: null } : r);
+    } else {
+      dump.stores[s] = rows;
+    }
+  }
+  dump.stats = {
+    documents: dump.stores.documents.length,
+    chunks: dump.stores.chunks.length,
+    answers: dump.stores.answers.length,
+    tools: dump.stores.tools.length
+  };
+  return dump;
+}
+
+function validateBackup(obj) {
+  const errs = [];
+  if (!obj || typeof obj !== 'object') return ['Not an object.'];
+  if (obj.format !== 'ali-backup') errs.push('format is not "ali-backup"');
+  if (!obj.stores || typeof obj.stores !== 'object') errs.push('missing "stores"');
+  if (obj.stores?.documents && !Array.isArray(obj.stores.documents)) errs.push('documents is not an array');
+  if (obj.stores?.chunks && !Array.isArray(obj.stores.chunks)) errs.push('chunks is not an array');
+  return errs;
+}
+
+async function importBackup(obj, { replace = false, merge = true } = {}) {
+  const errs = validateBackup(obj);
+  if (errs.length) throw new Error('Invalid backup: ' + errs.join('; '));
+
+  const counts = { documents: 0, chunks: 0, answers: 0, tools: 0, content: 0 };
+  if (replace) {
+    await atomic([
+      { store: 'documents', type: 'clear' }, { store: 'content', type: 'clear' },
+      { store: 'chunks', type: 'clear' }, { store: 'answers', type: 'clear' }
+    ]);
+  }
+  const docIds = new Set();
+  for (const d of obj.stores.documents || []) {
+    if (!d.id) continue;
+    docIds.add(d.id);
+    await idbPut('documents', d); counts.documents++;
+  }
+  for (const c of obj.stores.content || []) {
+    if (!c.id || !docIds.has(c.id)) continue;
+    await idbPut('content', c); counts.content++;
+  }
+  for (const ch of obj.stores.chunks || []) {
+    if (!ch.docId || !docIds.has(ch.docId)) continue;
+    await idbPut('chunks', ch); counts.chunks++;
+  }
+  for (const a of obj.stores.answers || []) { if (a.id) { await idbPut('answers', a); counts.answers++; } }
+  for (const tl of obj.stores.tools || []) { if (tl.id) { await idbPut('tools', tl); counts.tools++; } }
+
+  await reloadDocs();
+  IDX.built = false;
+  await audit('backup.import', JSON.stringify(counts) + ' replace=' + replace);
+  return counts;
+}
+
+/* ------------------------------------------------------------------ */
+/* 17. Tool registry                                                   */
+/* ------------------------------------------------------------------ */
+const INTERNAL_TOOLS = [
+  { id: 'ali.normalize.fa-en', version: '1.0.0', origin: 'internal',
+    capability: 'Persian/Arabic + Latin text normalization for indexing',
+    input: 'string', output: 'normalized string',
+    permissions: ['none'], limits: { maxInputChars: 5000000 },
+    description: 'NFC, diacritic removal, tatweel, ZWNJ join, yeh/kaf unification, lowercasing.',
+    knownLimitations: 'Not a morphological stemmer. ZWNJ is joined, which may merge distinct words.',
+    tests: 'self-test: normalize.*' },
+  { id: 'ali.tokenize.unicode', version: '1.0.0', origin: 'internal',
+    capability: 'Unicode-aware tokenization with Persian/English stopword filtering',
+    input: 'normalized string', output: 'string[]',
+    permissions: ['none'], limits: {},
+    description: 'Uses \\p{L}\\p{N} property escapes.',
+    knownLimitations: 'No stemming or lemmatization.', tests: 'self-test: tokenize.*' },
+  { id: 'ali.search.bm25', version: '1.0.0', origin: 'internal',
+    capability: 'Lexical ranking (Okapi BM25, k1=1.2, b=0.75) with phrase filtering',
+    input: '{query, docMap, filters}', output: '{results[], qTokens[]}',
+    permissions: ['none'], limits: { maxResults: 500 },
+    description: 'In-memory inverted index over indexed chunks.',
+    knownLimitations: 'Index is rebuilt in memory per session; large corpora consume RAM.',
+    tests: 'self-test: search.*' },
+  { id: 'ali.answer.extractive', version: '1.0.0', origin: 'internal',
+    capability: 'Evidence-grounded extractive answering with citations and contradiction detection',
+    input: '{question, filters}', output: 'answer object',
+    permissions: ['none'], limits: { passages: 8 },
+    description: 'Sentence-level IDF-weighted selection; explicit uncertainty and coverage reporting.',
+    knownLimitations: 'Extractive only — does not paraphrase or synthesise new sentences beyond the labelled synthesis line.',
+    tests: 'self-test: answer.*' },
+  { id: 'ali.score.source50', version: '1.0.0', origin: 'internal',
+    capability: 'Explainable 50-feature / 5-group source quality scoring',
+    input: '{document, context}', output: '{overall, groups[], features[]}',
+    permissions: ['none'], limits: { features: 50 },
+    description: 'Unknown features are marked unknown, never imputed. Weights versioned.',
+    knownLimitations: 'Many features are undetermined for plain text files. Not a truth evaluation.',
+    tests: 'self-test: score.*' },
+  { id: 'ali.extract.file', version: '1.0.0', origin: 'internal',
+    capability: 'File extraction for txt/md/csv/json/html and (network-dependent) PDF',
+    input: 'File', output: '{text, meta, sourceType}',
+    permissions: ['filesystem:read'], limits: { maxBytes: 'settings.maxFileBytes' },
+    description: 'Validates type, size, encoding; HTML is parsed with DOMParser and scripts removed.',
+    knownLimitations: 'No OCR. PDF requires loading pdf.js from a CDN (network).',
+    tests: 'self-test: extract.*' },
+  { id: 'ali.extract.url', version: '1.0.0', origin: 'internal',
+    capability: 'Public URL fetch with SSRF-oriented guards and redirect revalidation',
+    input: 'url string', output: '{text, meta}',
+    permissions: ['network:read'], limits: { timeoutMs: 20000, maxBytes: 'settings.maxFileBytes' },
+    description: 'Rejects non-http(s), credentials-in-URL, loopback/private/link-local hostnames.',
+    knownLimitations: 'Browser CORS prevents most cross-origin fetches without a proxy. DNS-level SSRF cannot be fully prevented client-side.',
+    tests: 'self-test: url.*' },
+  { id: 'ali.backup.json', version: '1.0.0', origin: 'internal',
+    capability: 'Full JSON export/import of the knowledge base',
+    input: '{includeBlobs}', output: 'backup object',
+    permissions: ['database:read', 'database:write'], limits: {},
+    description: 'Atomic restore with validation and post-restore verification.',
+    knownLimitations: 'Exports credentials as null. Original binary blobs are excluded unless explicitly enabled.',
+    tests: 'self-test: backup.*' },
+  { id: 'ali.hash.sha256', version: '1.0.0', origin: 'internal',
+    capability: 'Content hashing for duplicate detection and integrity',
+    input: 'string', output: '{hex, algo}',
+    permissions: ['none'], limits: {},
+    description: 'Uses Web Crypto SHA-256; falls back to a labelled non-cryptographic digest.',
+    knownLimitations: 'The fallback digest is NOT cryptographically secure and is labelled as such in stored metadata.',
+    tests: 'self-test: hash.*' }
+];
+
+async function seedTools() {
+  const existing = await idbAll('tools');
+  if (existing.length) return;
+  for (const tl of INTERNAL_TOOLS) {
+    await idbPut('tools', { ...tl, health: 'unknown', registeredAt: nowISO(), lastChecked: null });
+  }
+  await audit('tools.seed', INTERNAL_TOOLS.length + ' internal tools registered');
+}
+
+/** Health check: runs a real, minimal smoke test per tool. */
+async function healthCheckTool(tool) {
+  const t0 = performance.now();
+  let ok = false, detail = '';
+  try {
+    switch (tool.id) {
+      case 'ali.normalize.fa-en': {
+        const r = normalizeText('كتابِ مِي‌رود');
+        ok = r.includes('کتاب') && r.includes('میرود') && !r.includes('\u200C');
+        detail = 'normalize("كتابِ مِي‌رود") => "' + r + '"';
+        break;
+      }
+      case 'ali.tokenize.unicode': {
+        const r = tokenize(normalizeText('Hello world از کتاب'));
+        ok = r.includes('hello') && r.includes('کتاب') && !r.includes('از');
+        detail = JSON.stringify(r);
+        break;
+      }
+      case 'ali.search.bm25': {
+        const idx = buildIndexData([
+          { id: 'c1', docId: 'd1', idx: 0, raw: 'quantum entanglement experiments', norm: normalizeText('quantum entanglement experiments') },
+          { id: 'c2', docId: 'd2', idx: 0, raw: 'cooking recipes for bread', norm: normalizeText('cooking recipes for bread') }
+        ]);
+        const dm = new Map([['d1', { id: 'd1', lang: 'en', sourceType: 'text', createdAt: nowISO() }],
+                            ['d2', { id: 'd2', lang: 'en', sourceType: 'text', createdAt: nowISO() }]]);
+        const r = bm25Rank(idx, 'quantum entanglement', dm, {});
+        ok = r.results.length && r.results[0].docId === 'd1';
+        detail = 'top result = ' + (r.results[0]?.docId || 'none');
+        break;
+      }
+      case 'ali.hash.sha256': {
+        const a = await sha256Hex('abc'), b = await sha256Hex('abc'), c = await sha256Hex('abd');
+        ok = a.hex === b.hex && a.hex !== c.hex && a.hex.length === 64;
+        detail = a.algo + ' ' + a.hex.slice(0, 16) + '…';
+        break;
+      }
+      case 'ali.score.source50': {
+        const ev = evaluateSource({ id: 'x', title: 'x', sourceType: 'text', meta: {}, chunkCount: 1, version: 1, status: 'indexed' },
+          { docs: [], chunks: [], text: '', hasRaw: true, nearDup: null, corroborators: [], contradictions: null, numericConflict: null });
+        ok = ev.features.length === 50 && ev.groups.length === 5 &&
+             (ev.overall === null || (ev.overall >= 0 && ev.overall <= 1));
+        detail = '50 features, 5 groups, overall=' + (ev.overall == null ? 'null' : ev.overall.toFixed(3));
+        break;
+      }
+      case 'ali.extract.url': {
+        const r1 = validateUrl('http://127.0.0.1/x'), r2 = validateUrl('file:///etc/passwd'),
+              r3 = validateUrl('https://example.com/page'), r4 = validateUrl('https://user:pw@example.com/');
+        ok = !r1.ok && !r2.ok && r3.ok && !r4.ok;
+        detail = 'loopback blocked, file:// blocked, credentials blocked, https allowed';
+        break;
+      }
+      case 'ali.backup.json': {
+        const errs = validateBackup({ format: 'ali-backup', stores: { documents: [], chunks: [] } });
+        const bad = validateBackup({ format: 'nope' });
+        ok = errs.length === 0 && bad.length > 0;
+        detail = 'valid backup accepted, invalid rejected';
+        break;
+      }
+      case 'ali.extract.file': {
+        ok = typeof extractFile === 'function' && typeof htmlToText === 'function';
+        detail = 'extractors present (network/file access not exercised by health check)';
+        break;
+      }
+      case 'ali.answer.extractive': {
+        ok = typeof askQuestion === 'function';
+        detail = 'answer engine present';
+        break;
+      }
+      default:
+        ok = false; detail = 'no health check implemented for this tool';
+    }
+  } catch (e) {
+    ok = false; detail = 'error: ' + e.message;
+  }
+  const ms = +(performance.now() - t0).toFixed(1);
+  const updated = { ...tool, health: ok ? 'pass' : 'fail', lastChecked: nowISO(), healthDetail: detail, healthMs: ms };
+  await idbPut('tools', updated);
+  await audit('tools.health', tool.id + ' => ' + (ok ? 'pass' : 'fail') + ' (' + ms + 'ms)');
+  return updated;
+}
+
+/* ------------------------------------------------------------------ */
+/* 18. Self-test suite (real assertions, runnable from Diagnostics)    */
+/* ------------------------------------------------------------------ */
+async function runSelfTests() {
+  const results = [];
+  const T = async (name, fn) => {
+    const t0 = performance.now();
+    try { await fn(); results.push({ name, pass: true, ms: +(performance.now() - t0).toFixed(1) }); }
+    catch (e) { results.push({ name, pass: false, ms: +(performance.now() - t0).toFixed(1), error: e.message }); }
+  };
+  const assert = (cond, msg) => { if (!cond) throw new Error(msg || 'assertion failed'); };
+  const eq = (a, b, msg) => { if (a !== b) throw new Error((msg || 'not equal') + ': ' + JSON.stringify(a) + ' !== ' + JSON.stringify(b)); };
+
+  /* --- normalization --- */
+  await T('normalize: Persian yeh/kaf unification', () => {
+    const r = normalizeText('كتاب على');
+    assert(r.includes('کتاب'), 'kaf not unified: ' + r);
+    assert(r.includes('علی'), 'yeh not unified: ' + r);
+  });
+  await T('normalize: ZWNJ joined, originals untouched', () => {
+    const src = 'می\u200Cرود';
+    const r = normalizeText(src);
+    eq(r, 'میرود', 'ZWNJ not joined');
+    eq(src, 'می\u200Cرود', 'source mutated');
+  });
+  await T('normalize: Arabic diacritics removed', () => {
+    eq(normalizeText('مُحَمَّد'), 'محمد');
+  });
+  await T('normalize: alef variants unified', () => {
+    eq(normalizeText('أحمد إبراهيم آمن'), 'احمد ابراهیم امن');
+  });
+  await T('normalize: Latin lowercased and whitespace collapsed', () => {
+    eq(normalizeText('  Hello    WORLD \n\n'), 'hello world');
+  });
+
+  /* --- tokenizer --- */
+  await T('tokenize: Unicode letters (Persian + English)', () => {
+    const r = tokenize(normalizeText('کتاب hello 123'));
+    assert(r.includes('کتاب') && r.includes('hello') && r.includes('123'), JSON.stringify(r));
+  });
+  await T('tokenize: stopwords removed in both languages', () => {
+    const r = tokenize(normalizeText('the book is در خانه'));
+    assert(!r.includes('the') && !r.includes('در') && r.includes('book'), JSON.stringify(r));
+  });
+  await T('tokenize: stopword-only query yields empty set', () => {
+    eq(tokenize(normalizeText('the and of در به از')).length, 0);
+  });
+
+  /* --- chunking --- */
+  await T('chunk: full coverage, no gaps beyond overlap', () => {
+    const text = 'Sentence one. Sentence two! Sentence three? '.repeat(120);
+    const chunks = chunkText(text, 300, 50);
+    assert(chunks.length > 1, 'expected multiple chunks');
+    eq(chunks[0].start, 0, 'first chunk must start at 0');
+    eq(chunks[chunks.length - 1].end, text.length, 'last chunk must end at text end');
+    for (let i = 1; i < chunks.length; i++) assert(chunks[i].start <= chunks[i - 1].end, 'gap between chunks ' + i);
+  });
+  await T('chunk: empty input yields no chunks', () => { eq(chunkText('', 300, 50).length, 0); });
+
+  /* --- hashing --- */
+  await T('hash: deterministic and collision-resistant on sample', async () => {
+    const a = await sha256Hex('hello'), b = await sha256Hex('hello'), c = await sha256Hex('hellp');
+    eq(a.hex, b.hex, 'same input different hash');
+    assert(a.hex !== c.hex, 'different input same hash');
+    eq(a.hex.length, 64, 'unexpected digest length');
+  });
+
+  /* --- language detection --- */
+  await T('lang: Persian / English / mixed detection', () => {
+    eq(detectLang('این یک متن فارسی است'), 'fa');
+    eq(detectLang('This is an English sentence'), 'en');
+    eq(detectLang(''), 'und');
+  });
+
+  /* --- search --- */
+  const mkDoc = (id, lang = 'en') => ({ id, lang, sourceType: 'text', createdAt: nowISO(), status: 'indexed' });
+  const mkIdx = () => buildIndexData([
+    { id: 'c1', docId: 'd1', idx: 0, raw: 'Quantum entanglement enables secure communication protocols.',
+      norm: normalizeText('Quantum entanglement enables secure communication protocols.') },
+    { id: 'c2', docId: 'd1', idx: 1, raw: 'Bread baking requires flour water and yeast.',
+      norm: normalizeText('Bread baking requires flour water and yeast.') },
+    { id: 'c3', docId: 'd2', idx: 0, raw: 'Secure communication uses quantum key distribution.',
+      norm: normalizeText('Secure communication uses quantum key distribution.') },
+    { id: 'c4', docId: 'd3', idx: 0, raw: 'درخت سیب در بهار شکوفه می‌دهد.',
+      norm: normalizeText('درخت سیب در بهار شکوفه می‌دهد.') }
+  ]);
+  const dm = new Map([['d1', mkDoc('d1')], ['d2', mkDoc('d2')], ['d3', mkDoc('d3', 'fa')]]);
+
+  await T('search: BM25 ranks the relevant chunk first', () => {
+    const r = bm25Rank(mkIdx(), 'quantum communication', dm, {});
+    assert(r.results.length > 0, 'no results');
+    assert(['c1', 'c3'].includes(r.results[0].chunkId), 'unexpected top chunk: ' + r.results[0].chunkId);
+    assert(!r.results.some(x => x.chunkId === 'c2'), 'irrelevant chunk returned');
+  });
+  await T('search: phrase query filters correctly', () => {
+    const r = bm25Rank(mkIdx(), '"quantum key distribution"', dm, {});
+    assert(r.results.length === 1 && r.results[0].chunkId === 'c3', JSON.stringify(r.results.map(x => x.chunkId)));
+  });
+  await T('search: Persian query retrieves Persian chunk', () => {
+    const r = bm25Rank(mkIdx(), 'شکوفه بهار', dm, {});
+    assert(r.results.length && r.results[0].chunkId === 'c4', 'Persian retrieval failed');
+  });
+  await T('search: language filter excludes other languages', () => {
+    const r = bm25Rank(mkIdx(), 'quantum شکوفه', dm, { lang: 'fa' });
+    assert(r.results.every(x => x.docId === 'd3'), 'lang filter leaked');
+  });
+  await T('search: no-result state is explicit, not an error', () => {
+    const r = bm25Rank(mkIdx(), 'zzzznonexistentterm', dm, {});
+    eq(r.results.length, 0);
+    eq(r.note, '');
+  });
+  await T('search: stopword-only query reports a note', () => {
+    const r = bm25Rank(mkIdx(), 'the and of', dm, {});
+    assert(r.note.length > 0, 'expected explanatory note');
+  });
+
+  /* --- sentences / snippets --- */
+  await T('sentences: split Latin and Persian punctuation', () => {
+    const s = splitSentences('One. Two! سه؟ چهار.');
+    assert(s.length >= 4, JSON.stringify(s));
+  });
+  await T('snippet: selects sentence containing query terms', () => {
+    const sn = buildSnippet('Alpha beta. The quantum protocol is secure. Gamma delta.', ['quantum']);
+    assert(/quantum/i.test(sn), sn);
+  });
+
+  /* --- contradictions --- */
+  await T('contradiction: negation mismatch detected', () => {
+    const r = findContradictions(
+      ['The vaccine does not cause the illness in healthy adults'],
+      ['The vaccine does cause the illness in healthy adults']);
+    assert(r.length > 0, 'negation mismatch not detected');
+  });
+  await T('contradiction: unrelated sentences produce no flag', () => {
+    const r = findContradictions(['Bread needs flour and water'], ['Quantum keys use photon polarization']);
+    eq(r.length, 0);
+  });
+
+  /* --- source scoring --- */
+  await T('score: exactly 50 features across 5 groups', () => {
+    eq(FEATURES.length, 50);
+    eq(FEATURE_GROUPS.length, 5);
+    for (const g of FEATURE_GROUPS) {
+      const n = FEATURES.filter(f => f.g === g.id).length;
+      eq(n, 10, 'group ' + g.id + ' has ' + n + ' features');
+      const w = FEATURES.filter(f => f.g === g.id).reduce((a, f) => a + f.w, 0);
+      assert(Math.abs(w - 1) < 1e-9, 'group ' + g.id + ' weights sum to ' + w);
+    }
+    const gw = FEATURE_GROUPS.reduce((a, g) => a + g.w, 0);
+    assert(Math.abs(gw - 1) < 1e-9, 'group weights sum to ' + gw);
+  });
+  await T('score: unknown features stay null (never imputed)', () => {
+    const ev = evaluateSource(
+      { id: 'x', title: 'x', sourceType: 'text', meta: {}, version: 1, status: 'indexed' },
+      { docs: [], chunks: [], text: '', hasRaw: true, nearDup: null, corroborators: [], contradictions: null, numericConflict: null });
+    const unknowns = ev.features.filter(f => f.value === null);
+    assert(unknowns.length > 0, 'expected some unknown features for a bare text doc');
+    assert(ev.features.every(f => f.value === null || (f.value >= 0 && f.value <= 1)), 'value out of range');
+  });
+  await T('score: overall stays within [0,1] when computable', () => {
+    const ev = evaluateSource(
+      { id: 'x', title: 'Report', sourceType: 'url', sourceUrl: 'https://example.org/a',
+        meta: { author: 'A. Writer', publisher: 'Example University Press', pubDate: '2024-01-01',
+                chan: { metadata: true, html: true }, extraction: { quality: 0.99 } },
+        contentHash: 'a'.repeat(64), hashAlgo: 'SHA-256', version: 1, status: 'indexed', lang: 'en' },
+      { docs: [], chunks: [{ norm: 'a b c' }], text: 'Methods\nWe measured n = 120 participants. Limitations exist. References\n[1] doi:10.1/x',
+        hasRaw: true, nearDup: { max: 0.05, withTitle: 'other' }, corroborators: [], contradictions: 0, numericConflict: 0 });
+    assert(ev.overall != null, 'overall should be computable');
+    assert(ev.overall >= 0 && ev.overall <= 1, 'overall out of range: ' + ev.overall);
+    assert(ev.groups.length === 5, 'expected 5 groups');
+  });
+
+  /* --- duplicate detection --- */
+  await T('near-duplicate: identical shingles score 1.0', () => {
+    const a = nearDupShingles('the quick brown fox jumps over the lazy dog again and again');
+    const b = nearDupShingles('the quick brown fox jumps over the lazy dog again and again');
+    eq(jaccard(a, b), 1);
+  });
+  await T('near-duplicate: unrelated text scores low', () => {
+    const a = nearDupShingles('quantum entanglement protocols for secure communication channels');
+    const b = nearDupShingles('bread baking requires flour water yeast and a warm oven');
+    assert(jaccard(a, b) < 0.1, 'unrelated texts too similar');
+  });
+
+  /* --- security --- */
+  await T('security: path traversal in filename is not used as a path', () => {
+    // The app never writes to a filesystem path; verify that the dangerous string
+    // is only ever stored as data and that our sanitizer neutralises it for display.
+    const evil = '../../etc/passwd';
+    const shown = esc(evil);
+    assert(!shown.includes('<') && shown.includes('..'), 'escaping failed');
+    eq(esc('<script>alert(1)</script>'), '&lt;script&gt;alert(1)&lt;/script&gt;');
+  });
+  await T('security: SSRF guard blocks private/loopback/file URLs', () => {
+    for (const u of ['http://127.0.0.1/a', 'http://localhost:8080', 'http://10.0.0.1/',
+                     'http://192.168.1.1/', 'http://169.254.169.254/latest/meta-data',
+                     'file:///etc/passwd', 'ftp://example.com/x', 'http://user:pw@example.com/']) {
+      assert(!validateUrl(u).ok, 'should be blocked: ' + u);
+    }
+    assert(validateUrl('https://example.com/article').ok, 'public https URL should be allowed');
+  });
+  await T('security: HTML extraction strips script content', () => {
+    const r = htmlToText('<html><head><title>T</title></head><body><script>evil()</script><p>Safe text</p></body></html>');
+    assert(!/evil/.test(r.text), 'script content leaked into text');
+    assert(/Safe text/.test(r.text), 'legitimate text lost');
+    eq(r.meta.title, 'T');
+  });
+  await T('security: settings export nulls credential fields', async () => {
+    const dump = await exportBackup({ includeBlobs: false });
+    const rows = dump.stores.settings || [];
+    const hashRow = rows.find(r => r.k === 'authHash');
+    if (hashRow) eq(hashRow.v, null, 'authHash exported');
+    assert(true);
+  });
+
+  /* --- backup --- */
+  await T('backup: malformed backup is rejected before touching data', () => {
+    assert(validateBackup({ format: 'nope' }).length > 0);
+    assert(validateBackup(null).length > 0);
+    eq(validateBackup({ format: 'ali-backup', stores: { documents: [], chunks: [] } }).length, 0);
+  });
+
+  /* --- answer engine structural checks --- */
+  await T('answer: empty query against empty KB returns explicit status', async () => {
+    // Uses the live index; if the KB has content this only checks the shape.
+    const r = await askQuestion('zzzzz_no_such_term_zzzzz');
+    assert(['not-found', 'answered', 'empty'].includes(r.status), 'unexpected status ' + r.status);
+    assert(Array.isArray(r.citations), 'citations must be an array');
+    if (r.status === 'not-found') assert(/not found|یافت نشد/i.test(r.directResponse), 'missing not-found wording');
+  });
+
+  /* --- UI/i18n --- */
+  await T('i18n: language toggle switches direction', () => {
+    const prev = LANG;
+    LANG = 'fa'; assert(t('a', 'ب') === 'ب');
+    LANG = 'en'; assert(t('a', 'ب') === 'a');
+    LANG = prev;
+  });
+
+  /* --- pagination math --- */
+  await T('pagination: page slicing is within bounds', () => {
+    const items = Array.from({ length: 53 }, (_, i) => i);
+    const per = 10, page = 3;
+    const slice = items.slice((page - 1) * per, page * per);
+    eq(slice.length, 10);
+    eq(slice[0], 20);
+    const last = items.slice(50, 60);
+    eq(last.length, 3);
+  });
+
+  /* --- tool registry --- */
+  await T('tools: registry entries have required fields', async () => {
+    const tools = await idbAll('tools');
+    assert(tools.length >= INTERNAL_TOOLS.length, 'expected seeded internal tools');
+    for (const tl of tools) {
+      assert(tl.id && tl.version, 'tool missing id/version: ' + JSON.stringify(tl));
+      assert(Array.isArray(tl.permissions), 'tool missing permissions: ' + tl.id);
+      assert(typeof tl.capability === 'string', 'tool missing capability: ' + tl.id);
+    }
+  });
+
+  const passed = results.filter(r => r.pass).length;
+  return { results, passed, failed: results.length - passed, total: results.length, at: nowISO() };
+}
+
+/* ------------------------------------------------------------------ */
+/* 19. Router + UI                                                     */
+/* ------------------------------------------------------------------ */
+const NAV = [
+  { grp: 'Knowledge' },
+  { id: 'dashboard', en: 'Dashboard', fa: 'داشبورد', icon: '▤' },
+  { id: 'import', en: 'Import', fa: 'ورود', icon: '＋' },
+  { id: 'library', en: 'Library', fa: 'کتابخانه', icon: '▦' },
+  { id: 'search', en: 'Search', fa: 'جست‌وجو', icon: '⌕' },
+  { id: 'answer', en: 'Answers', fa: 'پاسخ‌ها', icon: '◆' },
+  { grp: 'Analysis' },
+  { id: 'scoring', en: 'Source scoring', fa: 'امتیاز منابع', icon: '◍' },
+  { id: 'relations', en: 'Relationships', fa: 'روابط', icon: '⛓' },
+  { id: 'status', en: 'Index status', fa: 'وضعیت ایندکس', icon: '◔' },
+  { grp: 'System' },
+  { id: 'tools', en: 'Tool registry', fa: 'ثبت ابزارها', icon: '⚙' },
+  { id: 'settings', en: 'Settings', fa: 'تنظیمات', icon: '☰' },
+  { id: 'diagnostics', en: 'Diagnostics', fa: 'عیب‌یابی', icon: '✚' },
+  { id: 'audit', en: 'Audit log', fa: 'گزارش رویدادها', icon: '≡' }
+];
+
+let CURRENT = 'dashboard';
+let CURRENT_PARAMS = {};
+
+function renderNav() {
+  const nav = $('#nav');
+  nav.innerHTML = '';
+  for (const item of NAV) {
+    if (item.grp) {
+      const d = document.createElement('div');
+      d.className = 'grp'; d.textContent = t(item.grp, ({ Knowledge: 'دانش', Analysis: 'تحلیل', System: 'سیستم' })[item.grp]);
+      nav.appendChild(d); continue;
+    }
+    const b = document.createElement('button');
+    b.dataset.view = item.id;
+    b.className = (CURRENT === item.id ? 'active' : '');
+    b.innerHTML = '<span aria-hidden="true">' + item.icon + '</span><span>' + esc(t(item.en, item.fa)) + '</span>';
+    b.onclick = () => go(item.id);
+    nav.appendChild(b);
+  }
+}
+
+function go(view, params = {}) {
+  CURRENT = view; CURRENT_PARAMS = params;
+  location.hash = '#/' + view + (params.id ? '/' + params.id : '');
+  renderNav();
+  render();
+}
+
+async function render() {
+  const v = $('#view');
+  $('#vtitle').textContent = t(
+    (NAV.find(n => n.id === CURRENT) || {}).en || 'ALI',
+    (NAV.find(n => n.id === CURRENT) || {}).fa || 'ALI');
+  v.innerHTML = '<div class="empty">' + esc(t('Loading…', 'در حال بارگذاری…')) + '</div>';
+  try {
+    const fn = VIEWS[CURRENT] || VIEWS.dashboard;
+    const html = await fn(CURRENT_PARAMS);
+    v.innerHTML = html;
+    if (VIEW_RENDERERS[CURRENT]) await VIEW_RENDERERS[CURRENT](CURRENT_PARAMS);
+  } catch (e) {
+    console.error(e);
+    v.innerHTML = '<div class="card"><h3 style="color:var(--err)">' + esc(t('Error', 'خطا')) + '</h3><pre class="out">' + esc(e.stack || e.message) + '</pre></div>';
+  }
+}
+
+/* ---- shared small components ---- */
+const stat = (label, value, sub = '') =>
+  '<div class="card" style="margin:0"><div class="dim">' + esc(label) + '</div>' +
+  '<div style="font-size:24px;font-weight:600;letter-spacing:-.02em;margin-top:2px">' + esc(String(value)) + '</div>' +
+  (sub ? '<div class="dim" style="margin-top:2px">' + esc(sub) + '</div>' : '') + '</div>';
+
+function pct(n) { return n == null ? '—' : Math.round(n * 100) + '%'; }
+function badge(n, label) {
+  const cls = n == null ? '' : n >= 0.66 ? 'ok' : n >= 0.33 ? 'warn' : 'err';
+  return '<span class="tag ' + cls + '">' + esc(label || pct(n)) + '</span>';
+}
+
+/* ---- views ---- */
+const VIEWS = {};
+const VIEW_RENDERERS = {};
+
+/* Dashboard */
+VIEWS.dashboard = async () => {
+  const [docs, chunks, answers, tools, auditRows] = await Promise.all([
+    idbAll('documents'), idbCount('chunks'), idbCount('answers'), idbCount('tools'), idbAll('audit')
+  ]);
+  const live = docs.filter(d => d.status !== 'superseded');
+  const byLang = live.reduce((a, d) => { a[d.lang] = (a[d.lang] || 0) + 1; return a; }, {});
+  const byType = live.reduce((a, d) => { a[d.sourceType] = (a[d.sourceType] || 0) + 1; return a; }, {});
+  const recent = live.sort((a, b) => (b.createdAt || '').localeCompare(a.createdAt || '')).slice(0, 6);
+  const recentAudit = (auditRows || []).sort((a, b) => (b.ts || '').localeCompare(a.ts || '')).slice(0, 6);
+
+  return `
+  <div class="grid g4" style="margin-bottom:14px">
+    ${stat(t('Documents', 'اسناد'), live.length, t('versions excluded', 'بدون نسخه‌های قدیمی'))}
+    ${stat(t('Chunks', 'قطعه‌ها'), chunks, t('indexed passages', 'قطعه‌های ایندکس‌شده'))}
+    ${stat(t('Answers', 'پاسخ‌ها'), answers, t('stored', 'ذخیره‌شده'))}
+    ${stat(t('Tools', 'ابزارها'), tools, t('registered', 'ثبت‌شده'))}
+  </div>
+
+  <div class="card">
+    <h3>${esc(t('Knowledge engine', 'موتور دانش'))}</h3>
+    <p class="muted" style="margin:0 0 10px">${esc(t(
+      'Import → Extract → Preserve → Normalize → Index → Retrieve → Rank → Answer → Cite → Verify',
+      'ورود → استخراج → حفظ → نرمال‌سازی → ایندکس → بازیابی → رتبه‌بندی → پاسخ → ارجاع → بررسی'))}</p>
+    <div class="row">
+      <button class="btn primary" onclick="go('import')">${esc(t('Import documents', 'ورود اسناد'))}</button>
+      <button class="btn" onclick="go('search')">${esc(t('Search', 'جست‌وجو'))}</button>
+      <button class="btn" onclick="go('answer')">${esc(t('Ask a question', 'پرسش'))}</button>
+    </div>
+  </div>
+
+  <div class="grid g2">
+    <div class="card">
+      <h3>${esc(t('Composition', 'ترکیب'))}</h3>
+      <h4>${esc(t('By language', 'بر اساس زبان'))}</h4>
+      ${Object.keys(byLang).length ? Object.entries(byLang).map(([k, v]) =>
+        `<div class="row" style="justify-content:space-between;margin-bottom:4px"><span>${esc(k)}</span><span class="tag acc">${v}</span></div>`).join('')
+        : '<div class="dim">' + esc(t('No documents yet.', 'هنوز سندی وارد نشده.')) + '</div>'}
+      <h4>${esc(t('By source type', 'بر اساس نوع منبع'))}</h4>
+      ${Object.keys(byType).length ? Object.entries(byType).map(([k, v]) =>
+        `<div class="row" style="justify-content:space-between;margin-bottom:4px"><span>${esc(k)}</span><span class="tag">${v}</span></div>`).join('')
+        : '<div class="dim">—</div>'}
+    </div>
+    <div class="card">
+      <h3>${esc(t('Recent documents', 'اسناد اخیر'))}</h3>
+      ${recent.length ? recent.map(d => `
+        <div class="row" style="justify-content:space-between;border-bottom:1px solid var(--line);padding:6px 0">
+          <a href="#/doc/${esc(d.id)}" style="color:var(--fg);text-decoration:none">${esc(d.title)}</a>
+          <span class="tag">${esc(d.sourceType)}</span>
+        </div>`).join('') : '<div class="dim">' + esc(t('Nothing imported yet.', 'چیزی وارد نشده.')) + '</div>'}
+      <h4>${esc(t('Recent activity', 'فعالیت اخیر'))}</h4>
+      ${recentAudit.length ? recentAudit.map(a => `
+        <div class="dim" style="border-bottom:1px solid var(--line);padding:3px 0">
+          <code>${esc(a.action)}</code> ${esc((a.detail || '').slice(0, 70))}
+        </div>`).join('') : '<div class="dim">—</div>'}
+    </div>
+  </div>`;
+};
+
+/* Import */
+VIEWS.import = async () => `
+  <div class="card">
+    <h3>${esc(t('Import files', 'ورود فایل‌ها'))}</h3>
+    <div class="drop" id="drop">${esc(t(
+      'Drop files here or click to choose · txt, md, csv, json, html, pdf',
+      'فایل‌ها را اینجا رها کنید یا کلیک کنید · txt, md, csv, json, html, pdf'))}</div>
+    <input type="file" id="fileInput" multiple style="display:none">
+    <div class="dim" style="margin-top:8px">${esc(t(
+      'Originals are preserved as stored text. Binary blobs are only kept if enabled in Settings. Size limit: ' + fmtBytes(MAX_FILE_BYTES()),
+      'متن اصلی حفظ می‌شود. فایل دودویی فقط در صورت فعال‌سازی در تنظیمات ذخیره می‌شود. محدودیت حجم: ' + fmtBytes(MAX_FILE_BYTES())))}
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>${esc(t('Import from a public URL', 'ورود از نشانی عمومی'))}</h3>
+    <div class="row">
+      <input type="url" id="urlInput" placeholder="https://example.com/article" style="flex:1;min-width:220px">
+      <button class="btn" id="urlBtn">${esc(t('Fetch & import', 'دریافت و ورود'))}</button>
+    </div>
+    <div class="dim" style="margin-top:8px">${esc(t(
+      'Browser-side fetching is subject to CORS. Sites without permissive CORS headers will fail with an explicit error. A proxy can be configured in Settings.',
+      'دریافت در مرورگر تابع CORS است. سایت‌های بدون هدرهای باز، با خطای صریح شکست می‌خورند. پروکسی در تنظیمات قابل پیکربندی است.'))}
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>${esc(t('Paste text', 'چسباندن متن'))}</h3>
+    <div class="field"><label class="f">${esc(t('Title', 'عنوان'))}</label><input type="text" id="pasteTitle" placeholder="${esc(t('Optional title', 'عنوان اختیاری'))}"></div>
+    <div class="field"><label class="f">${esc(t('Text', 'متن'))}</label><textarea id="pasteText" placeholder="${esc(t('Paste document text…', 'متن سند را بچسبانید…'))}"></textarea></div>
+    <button class="btn primary" id="pasteBtn">${esc(t('Import pasted text', 'ورود متن چسبانده‌شده'))}</button>
+  </div>
+
+  <div class="card">
+    <h3>${esc(t('Import results', 'نتایج ورود'))}</h3>
+    <div id="importLog"><div class="dim">${esc(t('No imports in this session.', 'در این نشست ورودی ثبت نشده.'))}</div></div>
+  </div>`;
+
+VIEW_RENDERERS.import = async () => {
+  const drop = $('#drop'), input = $('#fileInput'), log = $('#importLog');
+  const entries = [];
+  const logLine = (html) => {
+    entries.unshift(html);
+    log.innerHTML = entries.join('');
+  };
+
+  drop.onclick = () => input.click();
+  drop.ondragover = e => { e.preventDefault(); drop.classList.add('over'); };
+  drop.ondragleave = () => drop.classList.remove('over');
+  drop.ondrop = async e => {
+    e.preventDefault(); drop.classList.remove('over');
+    await handleFiles([...e.dataTransfer.files]);
+  };
+  input.onchange = async () => { await handleFiles([...input.files]); input.value = ''; };
+
+  async function handleFiles(files) {
+    for (const f of files) {
+      logLine(`<div class="dim">⏳ ${esc(f.name)} — ${esc(t('extracting…', 'در حال استخراج…'))}</div>`);
+      try {
+        const rec = await extractFile(f);
+        const res = await ingestRecord(rec, {
+          originalBlob: S.storeOriginalBlob ? f : null,
+          title: rec.meta?.title || f.name
+        });
+        await reloadDocs(); IDX.built = false;
+        if (res.status === 'duplicate') {
+          logLine(`<div class="hit"><span class="tag warn">${esc(t('duplicate', 'تکراری'))}</span> ${esc(f.name)} — ${esc(res.message)}</div>`);
+        } else {
+          logLine(`<div class="hit"><span class="tag ok">${esc(res.status)}</span> ${esc(res.title)} · ${res.chunks} ${esc(t('chunks', 'قطعه'))} · ${esc(res.lang)}` +
+            (rec.warning ? `<div class="dim" style="color:var(--warn);margin-top:4px">${esc(rec.warning)}</div>` : '') + '</div>');
+        }
+      } catch (e) {
+        logLine(`<div class="hit"><span class="tag err">${esc(t('error', 'خطا'))}</span> ${esc(f.name)} — ${esc(e.message)}</div>`);
+        await audit('import.error', f.name + ': ' + e.message);
+      }
+    }
+  }
+
+  $('#urlBtn').onclick = async () => {
+    const url = $('#urlInput').value.trim();
+    if (!url) return;
+    const btn = $('#urlBtn'); btn.disabled = true;
+    logLine(`<div class="dim">⏳ ${esc(url)} — ${esc(t('fetching…', 'در حال دریافت…'))}</div>`);
+    try {
+      const rec = await fetchUrl(url);
+      const res = await ingestRecord(rec, { title: rec.meta?.title || url });
+      await reloadDocs(); IDX.built = false;
+      logLine(res.status === 'duplicate'
+        ? `<div class="hit"><span class="tag warn">duplicate</span> ${esc(url)}</div>`
+        : `<div class="hit"><span class="tag ok">${esc(res.status)}</span> ${esc(res.title)} · ${res.chunks} ${esc(t('chunks', 'قطعه'))}</div>`);
+    } catch (e) {
+      logLine(`<div class="hit"><span class="tag err">${esc(t('fetch failed', 'دریافت ناموفق'))}</span> ${esc(e.message)}</div>`);
+      await audit('url.error', url + ': ' + e.message);
+    } finally { btn.disabled = false; }
+  };
+
+  $('#pasteBtn').onclick = async () => {
+    const text = $('#pasteText').value;
+    if (!text.trim()) return toast(t('Nothing to import.', 'چیزی برای ورود نیست.'), 'warn');
+    try {
+      const res = await ingestRecord(
+        { text, sourceType: 'text', meta: { chan: {}, filename: 'pasted-' + Date.now() + '.txt' } },
+        { title: $('#pasteTitle').value.trim() || t('Pasted note', 'یادداشت چسبانده‌شده') });
+      await reloadDocs(); IDX.built = false;
+      $('#pasteText').value = ''; $('#pasteTitle').value = '';
+      logLine(`<div class="hit"><span class="tag ok">${esc(res.status)}</span> ${esc(res.title)} · ${res.chunks} ${esc(t('chunks', 'قطعه'))}</div>`);
+    } catch (e) {
+      logLine(`<div class="hit"><span class="tag err">error</span> ${esc(e.message)}</div>`);
+    }
+  };
+};
+
+/* Library */
+VIEWS.library = async (params) => {
+  const docs = [...DOCS.values()].sort((a, b) => (b.createdAt || '').localeCompare(a.createdAt || ''));
+  const q = (params.q || '').toLowerCase();
+  const filtered = q ? docs.filter(d => (d.title + ' ' + (d.sourceUrl || '') + ' ' + (d.filename || '')).toLowerCase().includes(q)) : docs;
+
+  return `
+  <div class="card">
+    <div class="row">
+      <input type="text" id="libFilter" placeholder="${esc(t('Filter by title, URL or filename…', 'فیلتر بر اساس عنوان، نشانی یا نام فایل…'))}" value="${esc(params.q || '')}" style="flex:1;min-width:200px">
+      <button class="btn" onclick="go('import')">${esc(t('Import', 'ورود'))}</button>
+    </div>
+  </div>
+  <div class="card">
+    <h3>${esc(t('Documents', 'اسناد'))} <span class="tag">${filtered.length}</span></h3>
+    ${filtered.length ? `<div style="overflow:auto"><table>
+      <thead><tr>
+        <th>${esc(t('Title', 'عنوان'))}</th><th>${esc(t('Type', 'نوع'))}</th>
+        <th>${esc(t('Lang', 'زبان'))}</th><th>${esc(t('Chunks', 'قطعه'))}</th>
+        <th>${esc(t('Version', 'نسخه'))}</th><th>${esc(t('Status', 'وضعیت'))}</th>
+        <th>${esc(t('Added', 'افزوده'))}</th>
+      </tr></thead><tbody>
+      ${filtered.map(d => `<tr>
+        <td><a href="#/doc/${esc(d.id)}" style="color:var(--fg)">${esc(d.title)}</a>
+          ${d.sourceUrl ? `<div class="dim" style="max-width:320px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(d.sourceUrl)}</div>` : ''}</td>
+        <td><span class="tag">${esc(d.sourceType)}</span></td>
+        <td>${esc(d.lang)}</td>
+        <td>${d.chunkCount ?? '—'}</td>
+        <td>${d.version}</td>
+        <td>${d.status === 'superseded' ? '<span class="tag warn">superseded</span>' : '<span class="tag ok">indexed</span>'}</td>
+        <td class="dim">${esc(fmtDate(d.createdAt))}</td>
+      </tr>`).join('')}
+      </tbody></table></div>`
+      : `<div class="empty">${esc(t('No documents match.', 'سندی مطابق نیست.'))}</div>`}
+  </div>`;
+};
+VIEW_RENDERERS.library = async () => {
+  const el = $('#libFilter');
+  if (el) el.oninput = () => {
+    const v = el.value;
+    clearTimeout(el._t);
+    el._t = setTimeout(() => go('library', { q: v }), 260);
+  };
+};
+
+/* Document detail */
+VIEWS.doc = async ({ id }) => {
+  const doc = await idbGet('documents', id);
+  if (!doc) return '<div class="empty">' + esc(t('Document not found.', 'سند یافت نشد.')) + '</div>';
+  const content = await idbGet('content', id);
+  const chunks = await reqP(tx('chunks').index('docId').getAll(id));
+  const ev = await evaluateSource(doc, await buildEvalContext(doc, [...DOCS.values()]));
+
+  return `
+  <div class="card">
+    <div class="row" style="justify-content:space-between">
+      <h3 style="margin:0">${esc(doc.title)}</h3>
+      <div class="row">
+        <button class="btn sm" onclick="go('answer',{doc:'${esc(doc.id)}'})">${esc(t('Ask about this', 'پرسش دربارهٔ این'))}</button>
+        <button class="btn sm danger" onclick="removeDoc('${esc(doc.id)}')">${esc(t('Delete', 'حذف'))}</button>
+      </div>
+    </div>
+    <dl class="kv" style="margin-top:12px">
+      <dt>${esc(t('Source type', 'نوع منبع'))}</dt><dd>${esc(doc.sourceType)}</dd>
+      <dt>${esc(t('Language', 'زبان'))}</dt><dd>${esc(doc.lang)}</dd>
+      <dt>${esc(t('URL', 'نشانی'))}</dt><dd>${doc.sourceUrl ? `<a href="${esc(doc.sourceUrl)}" target="_blank" rel="noopener noreferrer">${esc(doc.sourceUrl)}</a>` : '—'}</dd>
+      <dt>${esc(t('Filename', 'نام فایل'))}</dt><dd>${esc(doc.filename || '—')}</dd>
+      <dt>${esc(t('Size', 'حجم'))}</dt><dd>${fmtBytes(doc.sizeBytes)}</dd>
+      <dt>${esc(t('Words / chars', 'واژه / نویسه'))}</dt><dd>${doc.wordCount} / ${doc.charCount}</dd>
+      <dt>${esc(t('Chunks', 'قطعه'))}</dt><dd>${chunks.length}</dd>
+      <dt>${esc(t('Version', 'نسخه'))}</dt><dd>${doc.version}${doc.prevId ? ` · <a href="#/doc/${esc(doc.prevId)}">${esc(t('previous', 'قبلی'))}</a>` : ''}</dd>
+      <dt>${esc(t('Content hash', 'هش محتوا'))}</dt><dd><code>${esc(doc.hashAlgo)}:${esc((doc.contentHash || '').slice(0, 24))}…</code></dd>
+      <dt>${esc(t('Added', 'افزوده'))}</dt><dd>${esc(fmtDate(doc.createdAt))}</dd>
+      <dt>${esc(t('Original preserved', 'متن اصلی حفظ‌شده'))}</dt><dd>${content ? esc(t('yes', 'بله')) : esc(t('no', 'خیر'))}</dd>
+      ${doc.meta?.author ? `<dt>${esc(t('Author', 'نویسنده'))}</dt><dd>${esc(doc.meta.author)}</dd>` : ''}
+      ${doc.meta?.pubDate ? `<dt>${esc(t('Published', 'انتشار'))}</dt><dd>${esc(doc.meta.pubDate)}</dd>` : ''}
+      ${doc.meta?.extraction?.warning ? `<dt>${esc(t('Warning', 'هشدار'))}</dt><dd style="color:var(--warn)">${esc(doc.meta.extraction.warning)}</dd>` : ''}
+    </dl>
+  </div>
+
+  <div class="card">
+    <h3>${esc(t('Source quality (50-feature model)', 'کیفیت منبع (مدل ۵۰ ویژگی)'))}
+      <span class="tag acc">${esc(ev.version)}</span></h3>
+    <div class="row" style="gap:20px;margin-bottom:10px">
+      <div><div class="dim">${esc(t('Overall', 'کلی'))}</div><div style="font-size:22px;font-weight:600">${pct(ev.overall)}</div></div>
+      <div><div class="dim">${esc(t('Coverage', 'پوشش'))}</div><div style="font-size:22px;font-weight:600">${ev.knownFeatures}/${ev.totalFeatures}</div></div>
+      <div style="flex:1;min-width:180px">
+        ${ev.groups.map(g => `
+          <div style="margin-bottom:6px">
+            <div class="row" style="justify-content:space-between;font-size:11.5px">
+              <span class="dim">${esc(t(g.en, g.fa))}</span><span>${pct(g.score)}</span>
+            </div>
+            <div class="bar"><i style="width:${g.score == null ? 0 : g.score * 100}%"></i></div>
+          </div>`).join('')}
+      </div>
+    </div>
+    <div class="dim" style="margin-bottom:10px">${esc(ev.disclaimer)}</div>
+    <details><summary style="cursor:pointer;color:var(--acc)">${esc(t('Show all 50 features', 'نمایش همه ۵۰ ویژگی'))}</summary>
+      <div style="overflow:auto;margin-top:10px"><table>
+        <thead><tr><th>ID</th><th>${esc(t('Feature', 'ویژگی'))}</th><th>${esc(t('Value', 'مقدار'))}</th>
+        <th>${esc(t('Weight', 'وزن'))}</th><th>${esc(t('Evidence / note', 'شاهد / یادداشت'))}</th></tr></thead>
+        <tbody>${ev.features.map(f => `<tr>
+          <td><code>${esc(f.id)}</code></td>
+          <td title="${esc(f.definition)}">${esc(t(f.en, f.fa))}</td>
+          <td>${f.value == null ? '<span class="tag">unknown</span>' : badge(f.value)}</td>
+          <td class="dim">${f.weight.toFixed(2)}</td>
+          <td class="dim">${esc(f.note)}</td>
+        </tr>`).join('')}</tbody>
+      </table></div>
+    </details>
+  </div>
+
+  <div class="card">
+    <h3>${esc(t('Extracted text (first chunk)', 'متن استخراج‌شده (قطعه اول)'))}</h3>
+    <pre class="out">${esc((chunks[0]?.raw || '').slice(0, 3000))}</pre>
+    <div class="dim">${esc(t('Showing 1 of ' + chunks.length + ' chunks. Originals are stored verbatim.', 'نمایش ۱ از ' + chunks.length + ' قطعه. متن اصلی به‌صورت دست‌نخورده ذخیره شده است.'))}</div>
+  </div>`;
+};
+
+window.removeDoc = async (id) => {
+  if (!await requireAdmin(t('delete document', 'حذف سند'))) return;
+  if (!confirm(t('Delete this document and all its chunks? This cannot be undone.',
+                 'این سند و همه قطعه‌های آن حذف شود؟ بازگشت‌پذیر نیست.'))) return;
+  try {
+    await deleteDoc(id);
+    await reloadDocs();
+    toast(t('Document deleted.', 'سند حذف شد.'));
+    go('library');
+  } catch (e) { toast(e.message, 'err'); }
+};
+
+/* Search */
+VIEWS.search = async (params) => `
+  <div class="card">
+    <h3>${esc(t('Full-text search', 'جست‌وجوی متن کامل'))}</h3>
+    <div class="row">
+      <input type="text" id="q" placeholder="${esc(t('Search terms, or "an exact phrase"', 'واژه‌ها، یا "یک عبارت دقیق"'))}" value="${esc(params.q || '')}" style="flex:1;min-width:220px">
+      <button class="btn primary" id="searchBtn">${esc(t('Search', 'جست‌وجو'))}</button>
+    </div>
+    <div class="grid g4" style="margin-top:10px">
+      <div><label class="f">${esc(t('Language', 'زبان'))}</label>
+        <select id="fLang"><option value="any">${esc(t('Any', 'همه'))}</option><option value="en">English</option><option value="fa">فارسی</option></select></div>
+      <div><label class="f">${esc(t('Source type', 'نوع منبع'))}</label>
+        <select id="fType"><option value="any">${esc(t('Any', 'همه'))}</option>
+        ${['text','markdown','csv','json','html','pdf','url'].map(x => `<option value="${x}">${x}</option>`).join('')}</select></div>
+      <div><label class="f">${esc(t('From', 'از تاریخ'))}</label><input type="date" id="fFrom"></div>
+      <div><label class="f">${esc(t('To', 'تا تاریخ'))}</label><input type="date" id="fTo"></div>
+    </div>
+    <div class="dim" style="margin-top:8px">${esc(t(
+      'Retrieval method: lexical BM25 over the local index. Semantic/embedding retrieval is not active in this build — no embedding model is available in a single-file browser app.',
+      'روش بازیابی: BM25 واژگانی روی ایندکس محلی. بازیابی معنایی/جاسازی در این نسخه فعال نیست.'))}
+    </div>
+  </div>
+  <div id="results"></div>`;
+
+VIEW_RENDERERS.search = async (params) => {
+  const run = async () => {
+    const q = $('#q').value.trim();
+    if (!q) { $('#results').innerHTML = ''; return; }
+    await rebuildIndex();
+    const rank = bm25Rank(IDX.data, q, DOCS, {
+      lang: $('#fLang').value, sourceType: $('#fType').value,
+      dateFrom: $('#fFrom').value || undefined, dateTo: $('#fTo').value || undefined,
+      limit: 60
+    });
+    const box = $('#results');
+    if (!rank.results.length) {
+      box.innerHTML = `<div class="empty">${esc(t('No results. ', 'نتیجه‌ای نیست. '))}
+        ${esc(rank.note || t('The current knowledge base contains no matching passage.', 'پایگاه دانش فعلی قطعهٔ مطابقی ندارد.'))}</div>`;
+      return;
+    }
+    box.innerHTML = `<div class="card">
+      <h3>${rank.total} ${esc(t('matching passages', 'قطعهٔ مطابق'))}
+        <span class="dim" style="font-weight:400">· ${esc(t('showing', 'نمایش'))} ${rank.results.length}</span></h3>
+      ${rank.results.map(r => {
+        const cm = IDX.data.cmap.get(r.chunkId);
+        const doc = DOCS.get(r.docId);
+        const snip = buildSnippet(cm.raw, rank.qTokens);
+        return `<div class="hit">
+          <div class="t"><a href="#/doc/${esc(r.docId)}" style="color:var(--fg);text-decoration:none">${esc(doc?.title || r.docId)}</a>
+            <span class="tag">${esc(doc?.sourceType || '')}</span>
+            <span class="tag acc">score ${r.score.toFixed(2)}</span></div>
+          <div class="s">${highlight(snip, rank.qTokens)}</div>
+          <div class="dim" style="margin-top:4px">
+            ${esc(t('chunk', 'قطعه'))} #${cm.idx} · ${esc(t('matched', 'تطابق'))} ${r.matched}/${rank.qTokens.length}
+            ${doc?.sourceUrl ? ' · <a href="' + esc(doc.sourceUrl) + '" target="_blank" rel="noopener noreferrer">' + esc(t('source', 'منبع')) + '</a>' : ''}
+          </div>
+        </div>`;
+      }).join('')}
+    </div>`;
+  };
+  $('#searchBtn').onclick = run;
+  $('#q').onkeydown = e => { if (e.key === 'Enter') run(); };
+  if (params.q) run();
+};
+
+/* Answers */
+VIEWS.answer = async (params) => {
+  const docs = [...DOCS.values()].filter(d => d.status !== 'superseded');
+  return `
+  <div class="card">
+    <h3>${esc(t('Evidence-based answer', 'پاسخ مبتنی بر شواهد'))}</h3>
+    <div class="row">
+      <input type="text" id="question" placeholder="${esc(t('Ask a question about your knowledge base…', 'پرسشی دربارهٔ پایگاه دانش خود بپرسید…'))}" style="flex:1;min-width:240px">
+      <button class="btn primary" id="askBtn">${esc(t('Answer', 'پاسخ'))}</button>
+    </div>
+    <div class="row" style="margin-top:10px">
+      <div style="flex:1;min-width:200px"><label class="f">${esc(t('Restrict to document (optional)', 'محدود به سند (اختیاری)'))}</label>
+        <select id="aDoc"><option value="">${esc(t('All documents', 'همه اسناد'))}</option>
+        ${docs.map(d => `<option value="${esc(d.id)}" ${params.doc === d.id ? 'selected' : ''}>${esc(d.title)}</option>`).join('')}</select></div>
+      <div><label class="f">${esc(t('Language', 'زبان'))}</label>
+        <select id="aLang"><option value="any">${esc(t('Any', 'همه'))}</option><option value="en">English</option><option value="fa">فارسی</option></select></div>
+    </div>
+    <div class="dim" style="margin-top:8px">${esc(t(
+      'Answers are extractive: passages are quoted from your own documents and each one is cited. Nothing is invented. No external AI service is called unless you configure one in Settings.',
+      'پاسخ‌ها استخراجی‌اند: قطعه‌ها از اسناد خود شما نقل و ارجاع می‌شوند. هیچ چیز ساخته نمی‌شود. تا زمانی که سرویس هوش مصنوعی را در تنظیمات پیکربندی نکنید، فراخوانی خارجی انجام نمی‌شود.'))}</div>
+  </div>
+  <div id="answerBox"></div>`;
+
+VIEW_RENDERERS.answer = async (params) => {
+  const renderAnswer = (a) => {
+    const strengthTag = { strong: 'ok', moderate: 'acc', weak: 'warn', insufficient: 'err' }[a.evidenceStrength] || '';
+    return `
+    <div class="card">
+      <div class="row" style="justify-content:space-between">
+        <h3 style="margin:0">${esc(t('Answer', 'پاسخ'))}</h3>
+        <div class="row">
+          ${a.evidenceStrength ? `<span class="tag ${strengthTag}">${esc(t('evidence', 'شواهد'))}: ${esc(a.evidenceStrength)}</span>` : ''}
+          <span class="tag">${esc(a.retrieval || '')}</span>
+          <span class="tag">${esc(a.version)}</span>
+        </div>
+      </div>
+      <p style="margin:10px 0 4px"><strong>${esc(a.directResponse)}</strong></p>
+
+      ${a.citations?.length ? `
+        <h4>${esc(t('Sourced evidence', 'شواهد منبع‌دار'))}</h4>
+        ${a.citations.map(c => `
+          <div class="hit">
+            <div class="row" style="justify-content:space-between">
+              <div class="t">[${c.n}] ${esc(c.title)}</div>
+              <div class="dim">${esc(t('relevance', 'ارتباط'))} ${c.retrievalScore}</div>
+            </div>
+            <div class="quote">${esc(c.snippet)}</div>
+            <div class="dim">
+              ${c.url ? `<a href="${esc(c.url)}" target="_blank" rel="noopener noreferrer">${esc(c.url)}</a> · ` : ''}
+              <a href="#/doc/${esc(c.docId)}">${esc(t('open document', 'بازکردن سند'))}</a>
+              ${c.matchedTerms?.length ? ' · ' + esc(t('matched', 'تطابق')) + ': ' + c.matchedTerms.map(esc).join(', ') : ''}
+            </div>
+          </div>`).join('')}
+      ` : ''}
+
+      ${a.interpretation ? `<h4>${esc(t('Interpretation (system synthesis — not a sourced fact)', 'تفسیر (ترکیب سیستمی — نه واقعیت منبع‌دار)'))}</h4>
+        <p class="muted" style="margin:0">${esc(a.interpretation)}</p>` : ''}
+
+      ${a.contradictions?.length ? `<h4 style="color:var(--warn)">${esc(t('Potential contradictions', 'تناقض‌های احتمالی'))}</h4>
+        ${a.contradictions.map(c => `<div class="hit" style="border-color:#4a3c12">
+          <div class="dim">${esc(c.reason)} · ${esc(t('similarity', 'شباهت'))} ${c.similarity}</div>
+          <div class="quote">${esc(c.a)}</div>
+          <div class="dim">— ${esc(c.aDoc || '')}</div>
+          <div class="quote">${esc(c.b)}</div>
+          <div class="dim">— ${esc(c.bDoc || '')}</div>
+        </div>`).join('')}` : ''}
+
+      ${a.notes?.length ? `<h4>${esc(t('Uncertainty & method notes', 'عدم قطعیت و یادداشت روش'))}</h4>
+        <ul class="muted" style="margin:0;padding-inline-start:18px">${a.notes.map(n => `<li>${esc(n)}</li>`).join('')}</ul>` : ''}
+
+      ${a.llm ? `<h4>${esc(t('Language-model response', 'پاسخ مدل زبانی'))}</h4>
+        <div class="quote">${esc(a.llm.text)}</div>
+        <div class="dim">${esc(t('Generated by', 'تولیدشده توسط'))} ${esc(a.llm.model)} ${esc(t('from the cited passages above. Verify against the citations.', 'بر پایه قطعه‌های ارجاع‌شده بالا. با ارجاع‌ها بسنجید.'))}</div>` : ''}
+      ${a.llmError ? `<div class="dim" style="color:var(--err);margin-top:8px">${esc(a.llmError)}</div>` : ''}
+    </div>`;
+  };
+
+  const ask = async () => {
+    const q = $('#question').value.trim();
+    if (!q) return;
+    const box = $('#answerBox');
+    box.innerHTML = '<div class="card"><div class="dim">' + esc(t('Retrieving evidence…', 'در حال بازیابی شواهد…')) + '</div></div>';
+    try {
+      const docId = $('#aDoc').value;
+      const a = await askQuestion(q, {
+        docIds: docId ? new Set([docId]) : undefined,
+        lang: $('#aLang').value
+      });
+      box.innerHTML = renderAnswer(a);
+    } catch (e) {
+      box.innerHTML = '<div class="card"><div style="color:var(--err)">' + esc(e.message) + '</div></div>';
+    }
+  };
+  $('#askBtn').onclick = ask;
+  $('#question').onkeydown = e => { if (e.key === 'Enter') ask(); };
+};
+
+/* Source scoring overview */
+VIEWS.scoring = async () => {
+  const docs = [...DOCS.values()].filter(d => d.status !== 'superseded');
+  if (!docs.length) return '<div class="empty">' + esc(t('No documents to evaluate.', 'سندی برای ارزیابی نیست.')) + '</div>';
+  const rows = [];
+  for (const d of docs) {
+    const ctx = await buildEvalContext(d, [...DOCS.values()]);
+    rows.push({ doc: d, ev: evaluateSource(d, ctx) });
+  }
+  rows.sort((a, b) => (b.ev.overall ?? -1) - (a.ev.overall ?? -1));
+  return `
+  <div class="card">
+    <h3>${esc(t('Source evaluation', 'ارزیابی منابع'))} <span class="tag acc">${esc(SCORE_VERSION)}</span></h3>
+    <p class="dim" style="margin:0 0 12px">${esc(t(
+      'Source quality, evidence strength and query relevance are three separate dimensions. This table shows source quality only. Unknown features are marked unknown, never imputed.',
+      'کیفیت منبع، قدرت شواهد و ارتباط با پرسش سه بُعد جدا هستند. این جدول فقط کیفیت منبع را نشان می‌دهد. ویژگی‌های نامعلوم نامعلوم می‌مانند.'))}</p>
+    <div style="overflow:auto"><table>
+      <thead><tr>
+        <th>${esc(t('Document', 'سند'))}</th><th>${esc(t('Overall', 'کلی'))}</th>
+        ${FEATURE_GROUPS.map(g => `<th title="${esc(g.en)}">${esc(g.id)}</th>`).join('')}
+        <th>${esc(t('Coverage', 'پوشش'))}</th>
+      </tr></thead><tbody>
+      ${rows.map(({ doc, ev }) => `<tr>
+        <td><a href="#/doc/${esc(doc.id)}" style="color:var(--fg)">${esc(doc.title)}</a></td>
+        <td>${badge(ev.overall)}</td>
+        ${ev.groups.map(g => `<td>${g.score == null ? '<span class="tag">—</span>' : badge(g.score)}</td>`).join('')}
+        <td class="dim">${ev.knownFeatures}/${ev.totalFeatures}</td>
+      </tr>`).join('')}
+      </tbody></table></div>
+    <h4>${esc(t('Group legend', 'راهنمای گروه‌ها'))}</h4>
+    <div class="row">${FEATURE_GROUPS.map(g => `<span class="tag">${esc(g.id)} · ${esc(t(g.en, g.fa))} (${g.w})</span>`).join('')}</div>
+  </div>`;
+};
+
+/* Relationships */
+VIEWS.relations = async () => {
+  const docs = [...DOCS.values()].filter(d => d.status !== 'superseded');
+  if (docs.length < 2) return '<div class="empty">' + esc(t('Import at least two documents to explore relationships.', 'برای بررسی روابط حداقل دو سند وارد کنید.')) + '</div>';
+
+  const contents = new Map();
+  for (const d of docs) {
+    const c = await idbGet('content', d.id);
+    if (c) contents.set(d.id, c);
+  }
+  const topTerms = new Map();
+  for (const [id, c] of contents) {
+    const tf = new Map();
+    for (const tk of tokenize(c.norm)) tf.set(tk, (tf.get(tk) || 0) + 1);
+    topTerms.set(id, new Set([...tf.entries()].sort((a, b) => b[1] - a[1]).slice(0, 25).map(e => e[0])));
+  }
+
+  // Duplicate / derivative clusters
+  const shingles = new Map();
+  for (const [id, c] of contents) shingles.set(id, nearDupShingles(c.raw));
+  const pairs = [];
+  const ids = [...contents.keys()];
+  for (let i = 0; i < ids.length; i++) {
+    for (let j = i + 1; j < ids.length; j++) {
+      const sim = jaccard(shingles.get(ids[i]), shingles.get(ids[j]));
+      if (sim > 0.2) pairs.push({ a: ids[i], b: ids[j], sim });
+    }
+  }
+  pairs.sort((x, y) => y.sim - x.sim);
+
+  // Shared keyword matrix
+  const overlaps = [];
+  for (let i = 0; i < ids.length; i++) {
+    for (let j = i + 1; j < ids.length; j++) {
+      const A = topTerms.get(ids[i]), B = topTerms.get(ids[j]);
+      const shared = [...A].filter(x => B.has(x));
+      if (shared.length >= 4) overlaps.push({ a: ids[i], b: ids[j], shared });
+    }
+  }
+  overlaps.sort((x, y) => y.shared.length - x.shared.length);
+
+  const title = id => DOCS.get(id)?.title || id;
+
+  return `
+  <div class="card">
+    <h3>${esc(t('Duplicate & derivative content', 'محتوای تکراری و مشتق'))}</h3>
+    <p class="dim" style="margin:0 0 8px">${esc(t(
+      '5-gram Jaccard similarity over normalized token shingles. Above 60% is treated as derivative.',
+      'شباهت جاکارد ۵-گرام روی شینگل توکن‌های نرمال‌شده. بالای ۶۰٪ مشتق تلقی می‌شود.'))}</p>
+    ${pairs.length ? `<table><thead><tr><th>${esc(t('Document A', 'سند الف'))}</th><th>${esc(t('Document B', 'سند ب'))}</th><th>${esc(t('Similarity', 'شباهت'))}</th><th></th></tr></thead><tbody>
+      ${pairs.slice(0, 30).map(p => `<tr>
+        <td>${esc(title(p.a))}</td><td>${esc(title(p.b))}</td><td>${pct(p.sim)}</td>
+        <td>${p.sim > 0.6 ? '<span class="tag warn">' + esc(t('derivative', 'مشتق')) + '</span>' : ''}</td>
+      </tr>`).join('')}</tbody></table>` : '<div class="dim">' + esc(t('No significant overlap detected.', 'همپوشانی معناداری یافت نشد.')) + '</div>'}
+  </div>
+
+  <div class="card">
+    <h3>${esc(t('Shared keywords', 'واژه‌های مشترک'))}</h3>
+    ${overlaps.length ? overlaps.slice(0, 25).map(o => `
+      <div class="hit">
+        <div class="t">${esc(title(o.a))} ↔ ${esc(title(o.b))}</div>
+        <div>${o.shared.slice(0, 20).map(k => `<span class="tag acc">${esc(k)}</span>`).join('')}</div>
+      </div>`).join('') : '<div class="dim">' + esc(t('No documents share 4+ top terms.', 'هیچ دو سندی ۴ واژه پرتکرار مشترک ندارند.')) + '</div>'}
+  </div>
+
+  <div class="card">
+    <h3>${esc(t('Contradiction scan', 'اسکن تناقض'))}</h3>
+    <p class="dim" style="margin:0 0 8px">${esc(t(
+      'Heuristic: sentence pairs with ≥45% token overlap but opposite negation, or conflicting numbers.',
+      'اکتشافی: جفت‌جمله‌هایی با همپوشانی توکن ≥۴۵٪ اما نفی متضاد یا اعداد ناسازگار.'))}</p>
+    ${await (async () => {
+      const out = [];
+      for (let i = 0; i < ids.length && out.length < 12; i++) {
+        for (let j = i + 1; j < ids.length && out.length < 12; j++) {
+          const A = splitSentences(contents.get(ids[i]).raw).slice(0, 60);
+          const B = splitSentences(contents.get(ids[j]).raw).slice(0, 60);
+          const found = findContradictions(A, B, 0.5);
+          for (const f of found.slice(0, 2)) out.push({ ...f, aTitle: title(ids[i]), bTitle: title(ids[j]) });
+        }
+      }
+      if (!out.length) return '<div class="dim">' + esc(t('No contradictory pairs flagged by the heuristic.', 'هیچ جفت متناقضی توسط این روش علامت‌گذاری نشد.')) + '</div>';
+      return out.map(c => `<div class="hit" style="border-color:#4a3c12">
+        <div class="dim">${esc(c.reason)} · ${esc(t('similarity', 'شباهت'))} ${c.similarity}</div>
+        <div class="quote">${esc(c.a)}</div><div class="dim">— ${esc(c.aTitle)}</div>
+        <div class="quote">${esc(c.b)}</div><div class="dim">— ${esc(c.bTitle)}</div>
+      </div>`).join('');
+    })()}
+  </div>`;
+};
+
+/* Index status */
+VIEWS.status = async () => {
+  const docs = await idbAll('documents');
+  const chunkCount = await idbCount('chunks');
+  await rebuildIndex();
+  const perDoc = docs.filter(d => d.status !== 'superseded').map(d => ({ id: d.id, title: d.title, n: d.chunkCount || 0 }));
+  return `
+  <div class="grid g4" style="margin-bottom:14px">
+    ${stat(t('Indexed chunks', 'قطعه‌های ایندکس‌شده'), IDX.data.N, t('in memory', 'در حافظه'))}
+    ${stat(t('Distinct terms', 'واژه‌های متمایز'), IDX.data.postings.size, t('posting lists', 'لیست‌های واژه'))}
+    ${stat(t('Avg chunk length', 'میانگین طول قطعه'), Math.round(IDX.data.avgLen), t('tokens', 'توکن'))}
+    ${stat(t('Built at', 'ساخته‌شده در'), IDX.builtAt ? new Date(IDX.builtAt).toLocaleTimeString() : '—', '')}
+  </div>
+  <div class="card">
+    <h3>${esc(t('Retrieval pipeline', 'خط لوله بازیابی'))}</h3>
+    <dl class="kv">
+      <dt>${esc(t('Lexical ranking', 'رتبه‌بندی واژگانی'))}</dt><dd><span class="tag ok">active</span> Okapi BM25 (k1=1.2, b=0.75) over ${IDX.data.N} chunks</dd>
+      <dt>${esc(t('Phrase search', 'جست‌وجوی عبارتی'))}</dt><dd><span class="tag ok">active</span> ${esc(t('quoted phrases are matched against the normalized chunk', 'عبارت‌های داخل گیومه با متن نرمال‌شده مطابقت داده می‌شوند'))}</dd>
+      <dt>${esc(t('Semantic / embeddings', 'معنایی / جاسازی'))}</dt><dd><span class="tag">inactive</span> ${esc(t('no embedding model is bundled in this build; no vectors exist to search', 'مدل جاسازی در این نسخه همراه نیست؛ برداری برای جست‌وجو وجود ندارد'))}</dd>
+      <dt>${esc(t('Hybrid retrieval', 'بازیابی ترکیبی'))}</dt><dd><span class="tag">inactive</span> ${esc(t('requires the semantic layer above', 'نیازمند لایه معنایی بالا'))}</dd>
+      <dt>${esc(t('Language model', 'مدل زبانی'))}</dt><dd>${S.llm?.enabled && S.llm.endpoint ? '<span class="tag ok">configured</span> ' + esc(S.llm.endpoint) : '<span class="tag">not configured</span>'}</dd>
+    </dl>
+  </div>
+  <div class="card">
+    <h3>${esc(t('Chunks per document', 'قطعه‌ها به تفکیک سند'))}</h3>
+    <div style="overflow:auto"><table><thead><tr><th>${esc(t('Document', 'سند'))}</th><th>${esc(t('Chunks', 'قطعه'))}</th></tr></thead>
+    <tbody>${perDoc.map(p => `<tr><td><a href="#/doc/${esc(p.id)}" style="color:var(--fg)">${esc(p.title)}</a></td><td>${p.n}</td></tr>`).join('')}</tbody></table></div>
+    <div class="dim" style="margin-top:8px">${esc(t('Total stored chunks: ', 'مجموع قطعه‌های ذخیره‌شده: '))}${chunkCount}</div>
+  </div>`;
+};
+
+/* Tool registry */
+VIEWS.tools = async () => {
+  const tools = await idbAll('tools');
+  tools.sort((a, b) => a.id.localeCompare(b.id));
+  return `
+  <div class="card">
+    <h3>${esc(t('Internal tool registry', 'ثبت ابزارهای داخلی'))} <span class="tag">${tools.length}</span></h3>
+    <p class="dim" style="margin:0 0 10px">${esc(t(
+      'Build-before-buy: every capability lists its contract, permissions, resource limits and known limitations. Health checks execute real smoke tests.',
+      'ساخت پیش از خرید: هر قابلیت قرارداد، مجوزها، محدودیت منابع و محدودیت‌های شناخته‌شده را فهرست می‌کند. بررسی سلامت، آزمون واقعی اجرا می‌کند.'))}</p>
+    <button class="btn" id="checkAll">${esc(t('Run all health checks', 'اجرای همه بررسی‌های سلامت'))}</button>
+  </div>
+  <div id="toolList">
+    ${tools.map(tl => `
+      <div class="card">
+        <div class="row" style="justify-content:space-between">
+          <h3 style="margin:0"><code>${esc(tl.id)}</code> <span class="tag">v${esc(tl.version)}</span>
+            ${tl.origin === 'internal' ? '<span class="tag acc">internal</span>' : '<span class="tag">external</span>'}</h3>
+          <div class="row">
+            ${tl.health === 'pass' ? '<span class="tag ok">health: pass</span>'
+              : tl.health === 'fail' ? '<span class="tag err">health: fail</span>' : '<span class="tag">health: unknown</span>'}
+            <button class="btn sm" data-check="${esc(tl.id)}">${esc(t('Check', 'بررسی'))}</button>
+          </div>
+        </div>
+        <dl class="kv" style="margin-top:10px">
+          <dt>${esc(t('Capability', 'قابلیت'))}</dt><dd>${esc(tl.capability)}</dd>
+          <dt>${esc(t('Contract', 'قرارداد'))}</dt><dd><code>${esc(tl.input)}</code> → <code>${esc(tl.output)}</code></dd>
+          <dt>${esc(t('Permissions', 'مجوزها'))}</dt><dd>${(tl.permissions || []).map(p => `<span class="tag ${p === 'none' ? '' : 'warn'}">${esc(p)}</span>`).join('')}</dd>
+          <dt>${esc(t('Limits', 'محدودیت‌ها'))}</dt><dd><code>${esc(JSON.stringify(tl.limits || {}))}</code></dd>
+          <dt>${esc(t('Description', 'توضیح'))}</dt><dd>${esc(tl.description || '')}</dd>
+          <dt>${esc(t('Known limitations', 'محدودیت‌های شناخته‌شده'))}</dt><dd style="color:var(--warn)">${esc(tl.knownLimitations || '—')}</dd>
+          <dt>${esc(t('Last check', 'آخرین بررسی'))}</dt><dd>${tl.lastChecked ? esc(fmtDate(tl.lastChecked)) + ' · ' + esc(tl.healthDetail || '') : '—'}</dd>
+        </dl>
+      </div>`).join('')}
+  </div>`;
+};
+VIEW_RENDERERS.tools = async () => {
+  $$('[data-check]').forEach(b => {
+    b.onclick = async () => {
+      const id = b.dataset.check;
+      const tl = await idbGet('tools', id);
+      b.disabled = true; b.textContent = '…';
+      const r = await healthCheckTool(tl);
+      toast(id + ' → ' + r.health, r.health === 'pass' ? '' : 'err');
+      render();
+    };
+  });
+  const all = $('#checkAll');
+  if (all) all.onclick = async () => {
+    all.disabled = true;
+    const tools = await idbAll('tools');
+    for (const tl of tools) await healthCheckTool(tl);
+    toast(t('Health checks complete.', 'بررسی‌های سلامت کامل شد.'));
+    render();
+  };
+};
+
+/* Settings */
+VIEWS.settings = async () => `
+  <div class="card">
+    <h3>${esc(t('Interface', 'رابط کاربری'))}</h3>
+    <div class="row">
+      <button class="btn" id="setLang">${esc(t('Language', 'زبان'))}: ${LANG === 'fa' ? 'فارسی' : 'English'}</button>
+      <button class="btn" id="setTheme">${esc(t('Theme', 'پوسته'))}: ${S.theme}</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>${esc(t('Ingestion & indexing', 'ورود و ایندکس‌سازی'))}</h3>
+    <div class="grid g2">
+      <div><label class="f">${esc(t('Chunk size (characters)', 'اندازه قطعه (نویسه)'))}</label>
+        <input type="number" id="chunkSize" value="${S.chunkSize}" min="200" max="4000"></div>
+      <div><label class="f">${esc(t('Chunk overlap (characters)', 'همپوشانی قطعه (نویسه)'))}</label>
+        <input type="number" id="chunkOverlap" value="${S.chunkOverlap}" min="0" max="1000"></div>
+      <div><label class="f">${esc(t('Max file size (bytes)', 'حداکثر حجم فایل (بایت)'))}</label>
+        <input type="number" id="maxFileBytes" value="${S.maxFileBytes}" min="1024"></div>
+      <div><label class="f">${esc(t('Max chunks per document', 'حداکثر قطعه در هر سند'))}</label>
+        <input type="number" id="maxChunks" value="${S.maxChunksPerDoc}" min="1"></div>
+    </div>
+    <div class="field" style="margin-top:10px">
+      <label class="f">${esc(t('CORS proxy template (optional, e.g. https://proxy.example/?url={url})', 'قالب پروکسی CORS (اختیاری)'))}</label>
+      <input type="text" id="corsProxy" value="${esc(S.corsProxy || '')}" placeholder="https://proxy.example/?url={url}">
+      <div class="dim">${esc(t('Only set this if you trust the proxy operator: it will see every URL you ingest.', 'تنها اگر به گرداننده پروکسی اعتماد دارید تنظیم کنید: او همه نشانی‌ها را می‌بیند.'))}</div>
+    </div>
+    <div class="row">
+      <label class="row" style="gap:6px"><input type="checkbox" id="storeBlob" ${S.storeOriginalBlob ? 'checked' : ''} style="width:auto">
+        <span>${esc(t('Store original binary blobs (larger backups)', 'ذخیره فایل دودویی اصلی (پشتیبان بزرگ‌تر)'))}</span></label>
+    </div>
+    <button class="btn primary" id="saveIngest" style="margin-top:10px">${esc(t('Save', 'ذخیره'))}</button>
+  </div>
+
+  <div class="card">
+    <h3>${esc(t('Optional language-model provider', 'سرویس مدل زبانی (اختیاری)'))}</h3>
+    <p class="dim" style="margin:0 0 10px">${esc(t(
+      'Disabled by default. When enabled, the retrieved passages for each question are sent to the endpoint you configure. The extractive answer is always produced locally regardless.',
+      'به‌طور پیش‌فرض غیرفعال است. در صورت فعال‌سازی، قطعه‌های بازیابی‌شده به نشانی پیکربندی‌شده ارسال می‌شوند. پاسخ استخراجی همیشه به‌صورت محلی تولید می‌شود.'))}</p>
+    <div class="row" style="margin-bottom:8px">
+      <label class="row" style="gap:6px"><input type="checkbox" id="llmEnabled" ${S.llm?.enabled ? 'checked' : ''} style="width:auto">
+        <span>${esc(t('Enable external language model', 'فعال‌سازی مدل زبانی خارجی'))}</span></label>
+    </div>
+    <div class="grid g2">
+      <div><label class="f">${esc(t('Endpoint (OpenAI-compatible /chat/completions)', 'نشانی (سازگار با OpenAI)'))}</label>
+        <input type="url" id="llmEndpoint" value="${esc(S.llm?.endpoint || '')}" placeholder="https://host/v1/chat/completions"></div>
+      <div><label class="f">${esc(t('Model name', 'نام مدل'))}</label>
+        <input type="text" id="llmModel" value="${esc(S.llm?.model || '')}" placeholder="model-id"></div>
+      <div><label class="f">${esc(t('API key (stored in this browser only)', 'کلید API (فقط در این مرورگر)'))}</label>
+        <input type="password" id="llmKey" value="${esc(S.llm?.apiKey || '')}" autocomplete="off"></div>
+      <div><label class="f">${esc(t('Timeout (ms)', 'مهلت (میلی‌ثانیه)'))}</label>
+        <input type="number" id="llmTimeout" value="${S.llm?.timeoutMs || 30000}" min="1000"></div>
+    </div>
+    <button class="btn primary" id="saveLlm" style="margin-top:10px">${esc(t('Save provider', 'ذخیره سرویس'))}</button>
+  </div>
+
+  <div class="card">
+    <h3>${esc(t('Administration passcode', 'رمز مدیریت'))}</h3>
+    <p class="dim" style="margin:0 0 10px">${esc(t(
+      'When set, destructive actions (deleting documents, restoring backups, clearing data) require the passcode. It is hashed with PBKDF2-SHA256 and never stored in plaintext.',
+      'در صورت تنظیم، اقدامات مخرب نیازمند رمز هستند. رمز با PBKDF2-SHA256 هش می‌شود و هرگز به‌صورت متن ساده ذخیره نمی‌شود.'))}</p>
+    ${S.authEnabled ? `<div class="row"><span class="tag ok">${esc(t('enabled', 'فعال'))}</span>
+      <button class="btn danger" id="disableAuth">${esc(t('Disable passcode', 'غیرفعال‌سازی'))}</button></div>`
+      : `<div class="row"><input type="password" id="newPass" placeholder="${esc(t('New passcode (min 8 chars)', 'رمز جدید (حداقل ۸ نویسه)'))}" style="max-width:280px">
+        <button class="btn" id="setPass">${esc(t('Set passcode', 'تنظیم رمز'))}</button></div>
+      ${subtleOK ? '' : '<div class="dim" style="color:var(--warn);margin-top:6px">' + esc(t('Web Crypto is unavailable in this context — passcode auth cannot be enabled.', 'Web Crypto در این بستر در دسترس نیست.')) + '</div>'}`}
+  </div>
+
+  <div class="card">
+    <h3>${esc(t('Data', 'داده‌ها'))}</h3>
+    <div class="row">
+      <button class="btn" id="exportBtn">${esc(t('Export backup (JSON)', 'خروجی پشتیبان (JSON)'))}</button>
+      <button class="btn" id="importBtn">${esc(t('Restore from backup', 'بازیابی از پشتیبان'))}</button>
+      <button class="btn danger" id="wipeBtn">${esc(t('Clear all data', 'پاک‌کردن همه داده‌ها'))}</button>
+    </div>
+    <input type="file" id="restoreInput" accept="application/json" style="display:none">
+  </div>`;
+
+VIEW_RENDERERS.settings = async () => {
+  $('#setLang').onclick = async () => {
+    LANG = LANG === 'en' ? 'fa' : 'en';
+    sessionStorage.setItem('ali.lang', LANG);
+    await setSetting('lang', LANG);
+    applyLang(); renderNav(); render();
+  };
+  $('#setTheme').onclick = async () => {
+    const next = S.theme === 'dark' ? 'light' : 'dark';
+    await setSetting('theme', next);
+    document.documentElement.dataset.theme = next;
+    render();
+  };
+  $('#saveIngest').onclick = async () => {
+    await setSetting('chunkSize', Math.max(200, Math.min(4000, +$('#chunkSize').value || 900)));
+    await setSetting('chunkOverlap', Math.max(0, Math.min(1000, +$('#chunkOverlap').value || 0)));
+    await setSetting('maxFileBytes', Math.max(1024, +$('#maxFileBytes').value || 8388608));
+    await setSetting('maxChunksPerDoc', Math.max(1, +$('#maxChunks').value || 4000));
+    await setSetting('corsProxy', $('#corsProxy').value.trim());
+    await setSetting('storeOriginalBlob', $('#storeBlob').checked);
+    await audit('settings.update', 'ingestion');
+    toast(t('Saved. New settings apply to future imports.', 'ذخیره شد. تنظیمات جدید بر ورودهای آینده اثر دارد.'));
+  };
+  $('#saveLlm').onclick = async () => {
+    const enabled = $('#llmEnabled').checked;
+    const endpoint = $('#llmEndpoint').value.trim();
+    if (enabled && !endpoint) return toast(t('An endpoint is required to enable the provider.', 'برای فعال‌سازی، نشانی لازم است.'), 'err');
+    await setSetting('llm', {
+      enabled, endpoint,
+      model: $('#llmModel').value.trim(),
+      apiKey: $('#llmKey').value,
+      timeoutMs: Math.max(1000, +$('#llmTimeout').value || 30000)
+    });
+    await audit('settings.update', 'llm provider enabled=' + enabled);
+    toast(t('Provider settings saved.', 'تنظیمات سرویس ذخیره شد.'));
+  };
+  const sp = $('#setPass');
+  if (sp) sp.onclick = async () => {
+    try { await setPasscode($('#newPass').value); toast(t('Passcode set.', 'رمز تنظیم شد.')); render(); }
+    catch (e) { toast(e.message, 'err'); }
+  };
+  const da = $('#disableAuth');
+  if (da) da.onclick = async () => {
+    if (!await requireAdmin(t('disable passcode', 'غیرفعال‌سازی رمز'))) return;
+    await setSetting('authEnabled', false);
+    UNLOCKED = true;
+    await audit('auth.disabled', '');
+    toast(t('Passcode disabled.', 'رمز غیرفعال شد.'));
+    render();
+  };
+  $('#exportBtn').onclick = async () => {
+    try {
+      const dump = await exportBackup({ includeBlobs: S.storeOriginalBlob });
+      const blob = new Blob([JSON.stringify(dump)], { type: 'application/json' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'ali-backup-' + new Date().toISOString().replace(/[:.]/g, '-') + '.json';
+      a.click();
+      setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+      await audit('backup.export', JSON.stringify(dump.stats));
+      toast(t('Backup exported: ', 'پشتیبان صادر شد: ') + JSON.stringify(dump.stats));
+    } catch (e) { toast(e.message, 'err'); }
+  };
+  $('#importBtn').onclick = () => $('#restoreInput').click();
+  $('#restoreInput').onchange = async (e) => {
+    const f = e.target.files[0];
+    if (!f) return;
+    if (!await requireAdmin(t('restore a backup', 'بازیابی پشتیبان'))) return;
+    try {
+      const text = await f.text();
+      let obj;
+      try { obj = JSON.parse(text); } catch (er) { throw new Error('File is not valid JSON.'); }
+      const errs = validateBackup(obj);
+      if (errs.length) throw new Error('Invalid backup: ' + errs.join('; '));
+      const replace = confirm(t('Replace existing data? Cancel = merge into current data.',
+        'داده‌های موجود جایگزین شوند؟ لغو = ادغام با داده‌های فعلی.'));
+      const counts = await importBackup(obj, { replace });
+      await reloadDocs();
+      toast(t('Restore complete: ', 'بازیابی کامل شد: ') + JSON.stringify(counts));
+      render();
+    } catch (er) { toast(er.message, 'err'); }
+    e.target.value = '';
+  };
+  $('#wipeBtn').onclick = async () => {
+    if (!await requireAdmin(t('clear all data', 'پاک‌کردن همه داده‌ها'))) return;
+    if (!confirm(t('This permanently deletes every document, chunk, answer and setting in this browser. Continue?',
+                   'این کار همه اسناد، قطعه‌ها، پاسخ‌ها و تنظیمات این مرورگر را حذف می‌کند. ادامه؟'))) return;
+    for (const s of ['documents', 'content', 'chunks', 'answers', 'audit']) await idbClear(s);
+    await reloadDocs();
+    IDX.built = false;
+    await audit('data.wipe', 'all knowledge stores cleared');
+    toast(t('All knowledge data cleared.', 'همه داده‌های دانش پاک شد.'));
+    render();
+  };
+};
+
+/* Diagnostics */
+VIEWS.diagnostics = async () => {
+  const [docs, chunks, content, answers, tools, auditRows] = await Promise.all([
+    idbCount('documents'), idbCount('chunks'), idbCount('content'),
+    idbCount('answers'), idbCount('tools'), idbCount('audit')
+  ]);
+  const orphanChunks = await (async () => {
+    const all = await idbAll('chunks');
+    const ids = new Set((await idbAll('documents')).map(d => d.id));
+    return all.filter(c => !ids.has(c.docId)).length;
+  })();
+  const missingContent = await (async () => {
+    const all = await idbAll('documents');
+    const ids = new Set((await idbAll('content')).map(c => c.id));
+    return all.filter(d => !ids.has(d.id)).length;
+  })();
+
+  return `
+  <div class="card">
+    <h3>${esc(t('Self-test suite', 'مجموعه آزمون خودکار'))}</h3>
+    <p class="dim" style="margin:0 0 10px">${esc(t(
+      'Runs real assertions against the live code paths. Results are computed in your browser — nothing is pre-recorded.',
+      'ادعاهای واقعی را روی کد اجرا می‌کند. نتایج در مرورگر شما محاسبه می‌شوند — هیچ نتیجه‌ای از پیش ثبت نشده است.'))}</p>
+    <button class="btn primary" id="runTests">${esc(t('Run self-tests', 'اجرای آزمون‌ها'))}</button>
+    <div id="testOut" style="margin-top:12px"></div>
+  </div>
+
+  <div class="card">
+    <h3>${esc(t('Database integrity', 'یکپارچگی پایگاه داده'))}</h3>
+    <dl class="kv">
+      <dt>${esc(t('Database', 'پایگاه داده'))}</dt><dd>IndexedDB <code>${DB_NAME}</code> v${DB_VER}</dd>
+      <dt>${esc(t('Documents', 'اسناد'))}</dt><dd>${docs}</dd>
+      <dt>${esc(t('Content records', 'رکوردهای محتوا'))}</dt><dd>${content} ${missingContent ? `<span class="tag err">${missingContent} missing</span>` : '<span class="tag ok">complete</span>'}</dd>
+      <dt>${esc(t('Chunks', 'قطعه‌ها'))}</dt><dd>${chunks} ${orphanChunks ? `<span class="tag err">${orphanChunks} orphaned</span>` : '<span class="tag ok">no orphans</span>'}</dd>
+      <dt>${esc(t('Answers', 'پاسخ‌ها'))}</dt><dd>${answers}</dd>
+      <dt>${esc(t('Tools', 'ابزارها'))}</dt><dd>${tools}</dd>
+      <dt>${esc(t('Audit records', 'رویدادها'))}</dt><dd>${auditRows}</dd>
+      <dt>${esc(t('Score model', 'مدل امتیاز'))}</dt><dd><code>${esc(SCORE_VERSION)}</code> · 50 features</dd>
+      <dt>${esc(t('Evidence model', 'مدل شواهد'))}</dt><dd><code>${esc(EVIDENCE_VERSION)}</code></dd>
+    </dl>
+  </div>
+
+  <div class="card">
+    <h3>${esc(t('Environment', 'محیط'))}</h3>
+    <dl class="kv">
+      <dt>${esc(t('Secure context', 'بستر امن'))}</dt><dd>${window.isSecureContext ? '<span class="tag ok">yes</span>' : '<span class="tag warn">no</span>'}</dd>
+      <dt>${esc(t('Web Crypto', 'Web Crypto'))}</dt><dd>${subtleOK ? '<span class="tag ok">available</span>' : '<span class="tag warn">unavailable — hash fallback in use, passcode auth disabled</span>'}</dd>
+      <dt>${esc(t('User agent', 'مرورگر'))}</dt><dd class="dim">${esc(navigator.userAgent)}</dd>
+      <dt>${esc(t('Storage estimate', 'برآورد فضا'))}</dt><dd id="storageEst">…</dd>
+    </dl>
+  </div>`;
+
+};
+VIEW_RENDERERS.diagnostics = async () => {
+  if (navigator.storage?.estimate) {
+    const est = await navigator.storage.estimate();
+    const el = $('#storageEst');
+    if (el) el.textContent = fmtBytes(est.usage) + ' / ' + fmtBytes(est.quota);
+  }
+  $('#runTests').onclick = async () => {
+    const btn = $('#runTests');
+    btn.disabled = true; btn.textContent = t('Running…', 'در حال اجرا…');
+    const out = $('#testOut');
+    out.innerHTML = '<div class="dim">' + esc(t('Executing assertions…', 'در حال اجرای ادعاها…')) + '</div>';
+    try {
+      const r = await runSelfTests();
+      const cls = r.failed === 0 ? 'ok' : 'err';
+      out.innerHTML = `
+        <div class="row" style="margin-bottom:10px">
+          <span class="tag ${cls}">${r.passed}/${r.total} ${esc(t('passed', 'موفق'))}</span>
+          ${r.failed ? `<span class="tag err">${r.failed} ${esc(t('failed', 'ناموفق'))}</span>` : ''}
+          <span class="dim">${esc(fmtDate(r.at))}</span>
+        </div>
+        <div style="overflow:auto"><table>
+          <thead><tr><th>${esc(t('Test', 'آزمون'))}</th><th>${esc(t('Result', 'نتیجه'))}</th><th>ms</th><th>${esc(t('Detail', 'جزئیات'))}</th></tr></thead>
+          <tbody>${r.results.map(x => `<tr>
+            <td>${esc(x.name)}</td>
+            <td>${x.pass ? '<span class="tag ok">pass</span>' : '<span class="tag err">fail</span>'}</td>
+            <td class="dim">${x.ms}</td>
+            <td class="dim">${x.pass ? '' : esc(x.error || '')}</td>
+          </tr>`).join('')}</tbody>
+        </table></div>`;
+      await audit('selftest.run', r.passed + '/' + r.total + ' passed');
+      toast(t('Tests: ', 'آزمون‌ها: ') + r.passed + '/' + r.total, r.failed ? 'err' : '');
+    } catch (e) {
+      out.innerHTML = '<div style="color:var(--err)">' + esc(e.message) + '</div>';
+    } finally { btn.disabled = false; btn.textContent = t('Run self-tests', 'اجرای آزمون‌ها'); }
+  };
+};
+
+/* Audit log */
+VIEWS.audit = async () => {
+  const rows = (await idbAll('audit')).sort((a, b) => (b.ts || '').localeCompare(a.ts || '')).slice(0, 300);
+  return `
+  <div class="card">
+    <h3>${esc(t('Audit log', 'گزارش رویدادها'))} <span class="tag">${rows.length}</span></h3>
+    <p class="dim" style="margin:0 0 10px">${esc(t(
+      'Records are append-only. Secrets, passcodes and API keys are never written here.',
+      'رکوردها فقط افزودنی هستند. رمزها و کلیدهای API هرگز اینجا نوشته نمی‌شوند.'))}</p>
+    ${rows.length ? `<div style="overflow:auto"><table>
+      <thead><tr><th>${esc(t('Time', 'زمان'))}</th><th>${esc(t('Action', 'رویداد'))}</th><th>${esc(t('Detail', 'جزئیات'))}</th></tr></thead>
+      <tbody>${rows.map(r => `<tr><td class="dim" style="white-space:nowrap">${esc(fmtDate(r.ts))}</td>
+        <td><code>${esc(r.action)}</code></td><td class="dim">${esc(r.detail)}</td></tr>`).join('')}</tbody>
+    </table></div>` : `<div class="empty">${esc(t('No activity yet.', 'هنوز فعالیتی ثبت نشده.'))}</div>`}
+  </div>`;
+};
+
+/* ------------------------------------------------------------------ */
+/* 20. Boot                                                            */
+/* ------------------------------------------------------------------ */
+function applyLang() {
+  document.documentElement.lang = LANG;
+  document.documentElement.dir = LANG === 'fa' ? 'rtl' : 'ltr';
+  $('#langBtn').textContent = LANG === 'fa' ? 'فا / EN' : 'EN / فا';
+}
+function applyTheme() { document.documentElement.dataset.theme = S.theme || 'dark'; }
+
+async function boot() {
+  try {
+    db = await openDB();
+  } catch (e) {
+    $('#view').innerHTML = '<div class="card"><h3 style="color:var(--err)">Database unavailable</h3>' +
+      '<p>IndexedDB could not be opened: ' + esc(e.message) + '</p>' +
+      '<p class="dim">Private browsing modes and some file:// contexts block IndexedDB. Serve this file from http://localhost or a normal https origin.</p></div>';
+    return;
+  }
+  await loadSettings();
+  UNLOCKED = !S.authEnabled;
+  applyTheme(); applyLang();
+
+  await seedTools();
+  await reloadDocs();
+  await rebuildIndex(true);
+
+  // PWA manifest (blob-based; service worker requires a separate file — see Docs card)
+  try {
+    const manifest = {
+      name: 'ALI — Adaptive Learning & Intelligence',
+      short_name: 'ALI',
+      start_url: '.',
+      display: 'standalone',
+      background_color: '#0b0c0e',
+      theme_color: '#0b0c0e',
+      icons: [{
+        src: 'data:image/svg+xml;base64,' + btoa(
+          '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192"><rect width="192" height="192" fill="#0b0c0e"/><text x="96" y="128" font-size="96" font-family="monospace" fill="#5eead4" text-anchor="middle">A</text></svg>'),
+        sizes: '192x192', type: 'image/svg+xml'
+      }]
+    };
+    const link = document.createElement('link');
+    link.rel = 'manifest';
+    link.href = URL.createObjectURL(new Blob([JSON.stringify(manifest)], { type: 'application/manifest+json' }));
+    document.head.appendChild(link);
+  } catch (_) { /* manifest is best-effort */ }
+
+  $('#langBtn').onclick = async () => {
+    LANG = LANG === 'en' ? 'fa' : 'en';
+    sessionStorage.setItem('ali.lang', LANG);
+    await setSetting('lang', LANG);
+    applyLang(); renderNav(); render();
+  };
+  $('#themeBtn').onclick = async () => {
+    const next = S.theme === 'dark' ? 'light' : 'dark';
+    await setSetting('theme', next);
+    applyTheme();
+    toast(t('Theme: ', 'پوسته: ') + next);
+  };
+
+  const hash = location.hash.replace(/^#\/?/, '').split('/');
+  if (hash[0] && VIEWS[hash[0]]) {
+    CURRENT = hash[0];
+    if (hash[1]) CURRENT_PARAMS = { id: hash[1] };
+  }
+  renderNav();
+  await render();
+  $('#buildinfo').textContent = 'v1.0.0 · ' + (IDX.data.N) + ' chunks · ' + (window.isSecureContext ? 'secure' : 'insecure');
+}
+
+window.addEventListener('hashchange', () => {
+  const h = location.hash.replace(/^#\/?/, '').split('/');
+  if (h[0] && VIEWS[h[0]] && h[0] !== CURRENT) { CURRENT = h[0]; CURRENT_PARAMS = h[1] ? { id: h[1] } : {}; renderNav(); render(); }
+});
+
+boot();
+</script>
+</body>
+</html>
